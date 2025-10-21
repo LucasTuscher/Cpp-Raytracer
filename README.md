@@ -1,4 +1,4 @@
-# C++ Raytracer
+# C++ Raytracer (Uni Project)
 
 Ein C++ Raytracer Projekt mit Google Test Integration.
 
