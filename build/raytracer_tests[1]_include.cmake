@@ -1,0 +1,5 @@
+if(EXISTS "C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/raytracer_tests[1]_tests.cmake")
+  include("C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/raytracer_tests[1]_tests.cmake")
+else()
+  add_test(raytracer_tests_NOT_BUILT raytracer_tests_NOT_BUILT)
+endif()

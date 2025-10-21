@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\lucas\OneDrive\Desktop\Cpp-Raytracer\build\_deps\googletest-subbuild\CMakeFiles\a40914745f68826cef46a50d6f4d8e19\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{BC41BFC4-22AB-3096-8366-EF37A8518ACE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

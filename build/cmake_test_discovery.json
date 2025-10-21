@@ -1,0 +1,17 @@
+{
+  "tests": 1,
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "BasicTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "AddFunction",
+          "file": "C:\\Users\\lucas\\OneDrive\\Desktop\\Cpp-Raytracer\\tests\\test_main.cpp",
+          "line": 9
+        }
+      ]
+    }
+  ]
+}

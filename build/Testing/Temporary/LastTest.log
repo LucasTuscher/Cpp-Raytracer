@@ -1,0 +1,30 @@
+Start testing: Oct 21 17:18 Mitteleuropäische Sommerzeit
+----------------------------------------------------------
+1/1 Testing: BasicTest.AddFunction
+1/1 Test: BasicTest.AddFunction
+Command: "C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/Debug/raytracer_tests.exe" "--gtest_filter=BasicTest.AddFunction" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build
+"BasicTest.AddFunction" start time: Oct 21 17:18 Mitteleuropäische Sommerzeit
+Output:
+----------------------------------------------------------
+Running main() from C:\Users\lucas\OneDrive\Desktop\Cpp-Raytracer\build\_deps\googletest-src\googletest\src\gtest_main.cc
+Note: Google Test filter = BasicTest.AddFunction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from BasicTest
+[ RUN      ] BasicTest.AddFunction
+[       OK ] BasicTest.AddFunction (0 ms)
+[----------] 1 test from BasicTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"BasicTest.AddFunction" end time: Oct 21 17:18 Mitteleuropäische Sommerzeit
+"BasicTest.AddFunction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 21 17:18 Mitteleuropäische Sommerzeit
