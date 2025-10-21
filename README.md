@@ -72,6 +72,6 @@ Cpp-Raytracer/
 ├── src/
 │   └── Main.cpp           # Haupt-Programm
 ├── tests/
-│   └── test_main.cpp      # Google Test Unit Tests
+│   └── TestMain.cpp      # Google Test Unit Tests
 └── build/
     └── Debug/             # Kompilierte .exe Dateien hier

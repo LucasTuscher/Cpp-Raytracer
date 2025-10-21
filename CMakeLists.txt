@@ -36,7 +36,7 @@ target_include_directories(raytracer PRIVATE
 
 # Test files
 set(TEST_SOURCES
-    tests/test_main.cpp
+    tests/TestMain.cpp
 )
 
 # Create test executable

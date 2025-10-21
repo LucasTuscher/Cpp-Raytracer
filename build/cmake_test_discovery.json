@@ -8,7 +8,7 @@
       "testsuite": [
         {
           "name": "AddFunction",
-          "file": "C:\\Users\\lucas\\OneDrive\\Desktop\\Cpp-Raytracer\\tests\\test_main.cpp",
+          "file": "C:\\Users\\lucas\\OneDrive\\Desktop\\Cpp-Raytracer\\tests\\TestMain.cpp",
           "line": 9
         }
       ]
