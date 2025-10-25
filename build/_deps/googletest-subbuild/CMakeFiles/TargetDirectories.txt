@@ -1,3 +1,0 @@
-C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/_deps/googletest-subbuild/CMakeFiles/googletest-populate.dir
-C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/_deps/googletest-subbuild/CMakeFiles/ALL_BUILD.dir
-C:/Users/lucas/OneDrive/Desktop/Cpp-Raytracer/build/_deps/googletest-subbuild/CMakeFiles/ZERO_CHECK.dir
