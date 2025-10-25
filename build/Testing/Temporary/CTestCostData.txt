@@ -1,2 +1,0 @@
-BasicTest.AddFunction 1 0.0068162
----
