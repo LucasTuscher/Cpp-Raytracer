@@ -1,25 +1,76 @@
-/* Color.cpp */
+/**
+ * Color.cpp
+ * 
+ * Implementierung der Color-Klasse für RGB-Farbberechnungen.
+ * Alle Operationen geben neue Color-Instanzen zurück (immutable).
+ */
 #include "Color.h"
 #include <algorithm> // für std::clamp
-#include <cmath>     // für std::fabs
+#include <cmath>
+#include <stdexcept>
 
-
-/* --------  ConstructorsAndFunctions  -------- */
-#pragma region ConstructorsAndFunctions
-
+// Konstruktor: Initialisiert RGB-Komponenten
 Color::Color(double r, double g, double b) : r(r), g(g), b(b) {}
 
-// Addiert zwei Farben komponentenweise und gibt eine neue Color zurück
+/**
+ * Addition zweier Farben
+ * 
+ * Addiert die RGB-Komponenten komponentenweise.
+ * Wird verwendet um mehrere Lichtquellen zu kombinieren.
+ */
 Color Color::operator+(const Color& c) const {
     return Color(r + c.r, g + c.g, b + c.b);
 }
 
-// Multipliziert jede Farbkomponente mit einem Skalar und gibt eine neue Color zurück
+/**
+ * Skalarmultiplikation
+ * 
+ * Multipliziert alle Farbkomponenten mit einem Skalar.
+ * Wird verwendet um die Helligkeit zu ändern oder Lichtintensität anzupassen.
+ */
 Color Color::operator*(double s) const {
     return Color(r * s, g * s, b * s);
 }
 
-// Begrenzt alle Farbkomponenten auf den Bereich [0,1] und gibt eine neue Color zurück
+/**
+ * Hadamard-Produkt (komponentenweise Multiplikation)
+ * 
+ * Multipliziert zwei Farben komponentenweise: (r1*r2, g1*g2, b1*b2)
+ * 
+ * Anwendungen:
+ * - Farbfilterung (Licht durch farbiges Glas)
+ * - Materialfarbe mit Lichtfarbe kombinieren
+ * - Texturfarbe mit Beleuchtung multiplizieren
+ */
+Color Color::operator*(const Color& c) const {
+    return Color(r * c.r, g * c.g, b * c.b);
+}
+
+/**
+ * Division durch Skalar
+ * 
+ * Teilt alle Farbkomponenten durch einen Skalar.
+ * Nützlich für Durchschnittsberechnungen (z.B. bei Anti-Aliasing).
+ */
+Color Color::operator/(double s) const {
+    if (std::fabs(s) < 1e-12) {
+        throw std::runtime_error("Division durch Null in Color::operator/"); 
+    }
+    return Color(r / s, g / s, b / s);
+}
+
+/**
+ * Clamping: Beschränkt Farbwerte auf [0, 1]
+ * 
+ * Schneidet Werte ab, die außerhalb des gültigen Bereichs liegen:
+ * - Werte < 0.0 werden auf 0.0 gesetzt
+ * - Werte > 1.0 werden auf 1.0 gesetzt
+ * 
+ * Notwendig vor der Ausgabe in Bildformate.
+ * 
+ * Hinweis: Einfaches Clamping kann zu Farbverfälschungen führen.
+ * Für bessere Ergebnisse sollte später Tone Mapping implementiert werden.
+ */
 Color Color::clamped() const {
     return Color(
         std::clamp(r, 0.0, 1.0),
@@ -28,19 +79,30 @@ Color Color::clamped() const {
     );
 }
 
-// Vergleicht zwei Farben mit einer kleinen Toleranz (eps) und gibt true zurück, 
-// wenn alle Komponenten nahezu gleich sind
+/**
+ * Vergleicht zwei Farben mit Epsilon-Toleranz
+ * 
+ * Berücksichtigt Gleitkomma-Ungenauigkeiten durch Verwendung einer Toleranz.
+ */
 bool Color::equals(const Color& c, double eps) const {
-    return std::fabs(r - c.r) < eps &&
-           std::fabs(g - c.g) < eps &&
-           std::fabs(b - c.b) < eps;
+    return std::fabs(r - c.r) <= eps &&
+           std::fabs(g - c.g) <= eps &&
+           std::fabs(b - c.b) <= eps;
 }
 
-const Color Color::BLACK() { return Color(0, 0, 0); }
-const Color Color::WHITE() { return Color(1, 1, 1); }
-const Color Color::RED()   { return Color(1, 0, 0); }
-const Color Color::GREEN() { return Color(0, 1, 0); }
-const Color Color::BLUE()  { return Color(0, 0, 1); }
+// Gleichheitsoperator: Verwendet Standard-Epsilon
+bool Color::operator==(const Color& c) const {
+    return equals(c);
+}
 
-#pragma endregion
-/* --------  ConstructorsAndFunctions  -------- */
+// Ungleichheitsoperator
+bool Color::operator!=(const Color& c) const {
+    return !equals(c);
+}
+
+// Vordefinierte Standardfarben
+Color Color::BLACK() { return Color(0.0, 0.0, 0.0); }  // Schwarz
+Color Color::WHITE() { return Color(1.0, 1.0, 1.0); }  // Weiß
+Color Color::RED()   { return Color(1.0, 0.0, 0.0); }  // Rot
+Color Color::GREEN() { return Color(0.0, 1.0, 0.0); }  // Grün
+Color Color::BLUE()  { return Color(0.0, 0.0, 1.0); }  // Blau

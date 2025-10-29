@@ -34,23 +34,43 @@ target_include_directories(raytracer PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
+# Source files for library
+set(LIB_SOURCES
+    src/Vector/Vector.cpp
+    src/Point/Point.cpp
+    src/Color/Color.cpp
+)
+
+# Create a library for shared code
+add_library(raytracer_lib ${LIB_SOURCES})
+target_include_directories(raytracer_lib PUBLIC 
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Link library to main executable
+target_link_libraries(raytracer raytracer_lib)
+
 # Test files
 set(TEST_SOURCES
     tests/TestMain.cpp
+    tests/PointTests.cpp
+    tests/VectorTests.cpp
+    tests/ColorTests.cpp
 )
 
 # Create test executable
 add_executable(raytracer_tests ${TEST_SOURCES})
 
-# Link Google Test to the test executable
+# Link Google Test and raytracer library to the test executable
 target_link_libraries(raytracer_tests
     GTest::gtest_main
     GTest::gmock_main
+    raytracer_lib
 )
 
 # Include directories for tests
 target_include_directories(raytracer_tests PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 # Add tests

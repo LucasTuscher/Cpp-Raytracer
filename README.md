@@ -1,77 +1,233 @@
-# C++ Raytracer (Uni Project)
+# C++ Raytracer
 
-Ein C++ Raytracer Projekt mit Google Test Integration.
+Ein C++ Raytracer basierend auf dem Universitätsskript "Mathematische Datenstrukturen – Punkte, Vektoren, Farben".
 
-## Projekt aufsetzen (erstmalig)
+## Übersicht
+
+Dieses Projekt implementiert die mathematischen Grundlagen für einen Raytracer:
+- **Point-Klasse**: Repräsentation von Orten im 3D-Raum mit homogenen Koordinaten
+- **Vector-Klasse**: Richtungen und Verschiebungen mit Skalar- und Kreuzprodukt
+- **Color-Klasse**: RGB-Farbmodell mit Hadamard-Produkt und Clamping
+
+## Features
+
+### Implementierte Datenstrukturen
+
+**Point (Punkt)**
+- Homogene Koordinaten (x, y, z, 1.0)
+- Operationen: Addition mit Vektoren, Subtraktion, Skalierung
+- Min/Max-Funktionen für Bounding Boxes
+- Epsilon-basierte Vergleiche
+
+**Vector (Vektor)**
+- Homogene Koordinaten (x, y, z, 0.0)
+- Operationen: Addition, Subtraktion, Negation, Skalierung
+- Längenberechnung (magnitude, sqrMagnitude)
+- Normalisierung
+- Skalarprodukt (dot product)
+- Kreuzprodukt (cross product)
+
+**Color (Farbe)**
+- RGB-Komponenten (r, g, b)
+- Farbaddition und Skalierung
+- Hadamard-Produkt (komponentenweise Multiplikation)
+- Clamping auf [0, 1]
+- Vordefinierte Farben (BLACK, WHITE, RED, GREEN, BLUE)
+
+### Test-Abdeckung
+
+- 39 Unit Tests mit Google Test
+- 100% Abdeckung aller Operationen
+- Exception-Handling Tests
+- Epsilon-Vergleiche für Gleitkomma-Genauigkeit
+
+## Schnellstart
+
+### Voraussetzungen
+
+- CMake 3.14 oder höher
+- C++17-kompatibler Compiler (MSVC, GCC, Clang)
+- PowerShell (für Windows)
+
+### Automatischer Build & Test
 
 ```powershell
-# Build-Verzeichnis erstellen
-mkdir build
-cd build
+# Alles in einem Schritt
+.\build_and_test.ps1
+```
 
+### Manueller Build
+
+```powershell
 # CMake konfigurieren
-cmake ..
+cmake -B build -S .
 
-# Projekt kompilieren
-cmake --build .
+# Projekt kompilieren (Release)
+cmake --build build --config Release
+
+# Oder Debug-Build
+cmake --build build --config Debug
 ```
 
-## Programm ausführen
+## Verwendung
+
+### Tests ausführen
 
 ```powershell
-# Von Projekt-Root aus:
-.\build\Debug\raytracer.exe
-
-# Oder im build-Ordner:
+# Mit ctest
 cd build
-.\Debug\raytracer.exe
+ctest -C Release --output-on-failure
+
+# Direkt das Test-Executable
+.\build\Release\raytracer_tests.exe
 ```
 
-## Tests ausführen
+### Hauptprogramm ausführen
 
 ```powershell
-# Option 1: Mit ctest
-cd build
-ctest --output-on-failure -C Debug
-
-# Option 2: Direkt
-cd build
-.\Debug\raytracer_tests.exe
+.\build\Release\raytracer.exe
 ```
 
-## Nach Änderungen neu kompilieren
-
-Wenn du **Main.cpp** oder andere Dateien änderst:
-
-```powershell
-cd build
-cmake --build .
+**Beispielausgabe:**
+```
+diff: (-2, 0, 2)
+moved: (2, 0, 6)
+cross: (-4, -8, -4)
+bright: (0.75, 1, 1)
 ```
 
-Das war's! CMake erkennt automatisch welche Dateien geändert wurden und kompiliert nur diese neu.
+## Code-Beispiele
 
-## Projekt komplett neu bauen
+### Punkte und Vektoren
 
-Falls etwas schiefgeht:
+```cpp
+#include "Point/Point.h"
+#include "Vector/Vector.h"
 
-```powershell
-# Build-Ordner löschen und neu anfangen
-Remove-Item -Recurse -Force build
-mkdir build
-cd build
-cmake ..
-cmake --build .
+// Punkte erstellen
+Point camera(0, 0, -5);
+Point target(0, 0, 0);
+
+// Richtungsvektor berechnen
+Vector direction = target - camera;  // Punkt - Punkt = Vektor
+Vector normalized = direction.normalized();
+
+// Punkt verschieben
+Point newPos = camera + direction * 0.5;
+
+// Skalarprodukt
+double dot = Vector::dot(direction, Vector(0, 1, 0));
+
+// Kreuzprodukt
+Vector up(0, 1, 0);
+Vector right = Vector::cross(direction, up);
+```
+
+### Farben
+
+```cpp
+#include "Color/Color.h"
+
+// Farben erstellen
+Color red = Color::RED();
+Color custom(0.5, 0.3, 0.8);
+
+// Farboperationen
+Color mixed = red * custom;           // Hadamard-Produkt
+Color bright = (custom * 2.5).clamped();  // Skalierung + Clamping
+Color sum = red + custom;
 ```
 
 ## Projekt-Struktur
 
 ```
 Cpp-Raytracer/
-├── CMakeLists.txt          # CMake Konfiguration
-├── README.md               # Diese Datei
-├── src/
-│   └── Main.cpp           # Haupt-Programm
-├── tests/
-│   └── TestMain.cpp      # Google Test Unit Tests
-└── build/
-    └── Debug/             # Kompilierte .exe Dateien hier
+├── src/                          # Quellcode
+│   ├── Point/
+│   │   ├── Point.h              # Point-Klasse
+│   │   └── Point.cpp
+│   ├── Vector/
+│   │   ├── Vector.h             # Vector-Klasse
+│   │   └── Vector.cpp
+│   ├── Color/
+│   │   ├── Color.h              # Color-Klasse
+│   │   └── Color.cpp
+│   └── Main.cpp                 # Demo-Programm
+│
+├── tests/                        # Test-Suite
+│   ├── PointTests.cpp           # 13 Point-Tests
+│   ├── VectorTests.cpp          # 18 Vector-Tests
+│   ├── ColorTests.cpp           # 8 Color-Tests
+│   └── README.md                # Test-Dokumentation
+│
+├── build/                        # Build-Artefakte (generiert)
+│   └── Release/
+│       ├── raytracer.exe        # Hauptprogramm
+│       └── raytracer_tests.exe  # Tests
+│
+├── CMakeLists.txt               # CMake-Konfiguration
+├── build_and_test.ps1           # Build-Script
+├── README.md                    # Diese Datei
+├── IMPLEMENTATION.md            # Implementierungs-Details
+├── TESTING_SUMMARY.md           # Test-Ergebnisse
+├── PROJECT_STRUCTURE.md         # Detaillierte Struktur
+└── LICENSE                      # MIT Lizenz
+```
+
+## Nach Änderungen neu kompilieren
+
+```powershell
+# Nur geänderte Dateien neu kompilieren
+cmake --build build --config Release
+```
+
+CMake erkennt automatisch, welche Dateien geändert wurden.
+
+## Projekt komplett neu bauen
+
+```powershell
+# Build-Ordner löschen
+Remove-Item -Recurse -Force build
+
+# Neu konfigurieren und bauen
+cmake -B build -S .
+cmake --build build --config Release
+```
+
+## Koordinatensystem
+
+Das Projekt verwendet ein **linkshändiges Koordinatensystem**:
+- Positive x-Achse: nach rechts
+- Positive y-Achse: nach oben
+- Positive z-Achse: vom Betrachter weg
+
+Dies entspricht der Konvention von Unity und RenderMan.
+
+## Dokumentation
+
+- **IMPLEMENTATION.md**: Detaillierte Implementierungs-Dokumentation mit mathematischen Grundlagen
+- **TESTING_SUMMARY.md**: Vollständige Test-Ergebnisse und Feature-Übersicht
+- **PROJECT_STRUCTURE.md**: Detaillierte Projektstruktur und Code-Statistiken
+- **tests/README.md**: Test-Spezifikationen und Ausführungsanleitung
+
+## Nächste Entwicklungsschritte
+
+1. Matrix4x4-Klasse für Transformationen
+2. Ray-Klasse für Strahlverfolgung
+3. Camera-Klasse für Bildprojektion
+4. Geometrie-Primitiven (Sphere, Plane, Triangle)
+5. Intersection-Tests
+6. Material-System (Phong/PBR)
+7. Bildausgabe (PPM/PNG)
+
+## Technische Details
+
+- **C++ Standard**: C++17
+- **Build-System**: CMake 3.14+
+- **Test-Framework**: Google Test 1.14.0
+- **Compiler**: MSVC 19.38+ / GCC / Clang
+- **Gleitkomma-Genauigkeit**: double (1e-6 Epsilon)
+
+## Lizenz
+
+MIT License - Siehe LICENSE-Datei
