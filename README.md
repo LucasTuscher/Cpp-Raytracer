@@ -210,16 +210,6 @@ Dies entspricht der Konvention von Unity und RenderMan.
 - **PROJECT_STRUCTURE.md**: Detaillierte Projektstruktur und Code-Statistiken
 - **tests/README.md**: Test-Spezifikationen und Ausführungsanleitung
 
-## Nächste Entwicklungsschritte
-
-1. Matrix4x4-Klasse für Transformationen
-2. Ray-Klasse für Strahlverfolgung
-3. Camera-Klasse für Bildprojektion
-4. Geometrie-Primitiven (Sphere, Plane, Triangle)
-5. Intersection-Tests
-6. Material-System (Phong/PBR)
-7. Bildausgabe (PPM/PNG)
-
 ## Technische Details
 
 - **C++ Standard**: C++17
