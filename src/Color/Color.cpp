@@ -106,3 +106,35 @@ Color Color::WHITE() { return Color(1.0, 1.0, 1.0); }  // Weiß
 Color Color::RED()   { return Color(1.0, 0.0, 0.0); }  // Rot
 Color Color::GREEN() { return Color(0.0, 1.0, 0.0); }  // Grün
 Color Color::BLUE()  { return Color(0.0, 0.0, 1.0); }  // Blau
+
+/**
+ * Konvertiert Farbe in INT_RGB Format (0xRRGGBB)
+ * 
+ * Wandelt die Farbkomponenten in 8-bit Integer-Werte um (0-255).
+ * Die Werte werden vorher geclampet auf [0,1].
+ */
+int Color::toIntRGB() const {
+    Color clamped = this->clamped();
+    int red   = static_cast<int>(clamped.r * 255.0);
+    int green = static_cast<int>(clamped.g * 255.0);
+    int blue  = static_cast<int>(clamped.b * 255.0);
+    
+    return (red << 16) | (green << 8) | blue;
+}
+
+/**
+ * Erstellt eine Farbe aus INT_RGB Format
+ * 
+ * Wandelt 8-bit Integer-Werte zurück in Farbkomponenten [0,1].
+ */
+Color Color::fromIntRGB(int rgb) {
+    int red   = (rgb >> 16) & 0xFF;
+    int green = (rgb >> 8) & 0xFF;
+    int blue  = rgb & 0xFF;
+    
+    return Color(
+        red / 255.0,
+        green / 255.0,
+        blue / 255.0
+    );
+}

@@ -144,4 +144,26 @@ public:
      * @return Blau (0, 0, 1)
      */
     static Color BLUE();
+
+    /**
+     * Konvertiert die Farbe in INT_RGB Format
+     * 
+     * Wandelt die Farbkomponenten (0.0-1.0) in ein 32-bit Integer um.
+     * Format: 0xRRGGBB (8 Bit pro Kanal)
+     * Werte werden automatisch geclampet auf [0,1] vor der Konvertierung.
+     * 
+     * @return Integer-Repräsentation der Farbe
+     */
+    int toIntRGB() const;
+
+    /**
+     * Erstellt eine Farbe aus INT_RGB Format
+     * 
+     * Wandelt ein 32-bit Integer in Farbkomponenten um.
+     * Format: 0xRRGGBB (8 Bit pro Kanal)
+     * 
+     * @param rgb Integer-Repräsentation der Farbe
+     * @return Farbe mit Werten in [0,1]
+     */
+    static Color fromIntRGB(int rgb);
 };

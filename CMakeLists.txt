@@ -39,6 +39,8 @@ set(LIB_SOURCES
     src/Vector/Vector.cpp
     src/Point/Point.cpp
     src/Color/Color.cpp
+    src/Canvas/Canvas.cpp
+    src/Ray/Ray.cpp
 )
 
 # Create a library for shared code
