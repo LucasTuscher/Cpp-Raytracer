@@ -45,18 +45,26 @@ Dieses Projekt implementiert die mathematischen Grundlagen für einen Raytracer:
 
 ### Voraussetzungen
 
+**Windows:**
 - CMake 3.14 oder höher
-- C++17-kompatibler Compiler (MSVC, GCC, Clang)
-- PowerShell (für Windows)
+- Visual Studio 2019/2022 (MSVC-Compiler) oder MinGW
+- PowerShell
 
-### Automatischer Build & Test
+**macOS:**
+- CMake 3.14 oder höher
+- Xcode Command Line Tools: `xcode-select --install`
+- C++17-kompatibler Compiler (Clang)
+
+### Build & Test (Windows)
+
+#### Automatischer Build & Test
 
 ```powershell
 # Alles in einem Schritt
 .\build_and_test.ps1
 ```
 
-### Manueller Build
+#### Manueller Build
 
 ```powershell
 # CMake konfigurieren
@@ -69,24 +77,50 @@ cmake --build build --config Release
 cmake --build build --config Debug
 ```
 
-## Verwendung
-
-### Tests ausführen
+#### Programm ausführen
 
 ```powershell
-# Mit ctest
+# Tests ausführen
+.\build\Release\raytracer_tests.exe
+
+# Oder mit ctest
 cd build
 ctest -C Release --output-on-failure
 
-# Direkt das Test-Executable
-.\build\Release\raytracer_tests.exe
-```
-
-### Hauptprogramm ausführen
-
-```powershell
+# Hauptprogramm ausführen
 .\build\Release\raytracer.exe
 ```
+
+### Build & Test (macOS)
+
+#### Build-Prozess
+
+```bash
+# CMake konfigurieren
+cmake -B build -S .
+
+# Projekt kompilieren (Release)
+cmake --build build --config Release
+
+# Oder Debug-Build
+cmake --build build --config Debug
+```
+
+#### Programm ausführen
+
+```bash
+# Tests ausführen
+./build/raytracer_tests
+
+# Oder mit ctest
+cd build
+ctest --output-on-failure
+
+# Hauptprogramm ausführen
+./build/raytracer
+```
+
+**Hinweis für macOS:** Auf macOS werden die Executables direkt im `build/`-Ordner erstellt (nicht in `build/Release/`), da Xcode/Make eine andere Ordnerstruktur als MSVC verwendet.
 
 **Beispielausgabe:**
 ```
@@ -176,7 +210,14 @@ Cpp-Raytracer/
 
 ## Nach Änderungen neu kompilieren
 
+**Windows:**
 ```powershell
+# Nur geänderte Dateien neu kompilieren
+cmake --build build --config Release
+```
+
+**macOS:**
+```bash
 # Nur geänderte Dateien neu kompilieren
 cmake --build build --config Release
 ```
@@ -185,9 +226,20 @@ CMake erkennt automatisch, welche Dateien geändert wurden.
 
 ## Projekt komplett neu bauen
 
+**Windows:**
 ```powershell
 # Build-Ordner löschen
 Remove-Item -Recurse -Force build
+
+# Neu konfigurieren und bauen
+cmake -B build -S .
+cmake --build build --config Release
+```
+
+**macOS:**
+```bash
+# Build-Ordner löschen
+rm -rf build
 
 # Neu konfigurieren und bauen
 cmake -B build -S .
