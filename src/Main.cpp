@@ -39,7 +39,7 @@ void renderPixelCoordinates(int width, int height, const Point& viewerPos) {
     }
     
     canvas.save();
-    std::cout << "✓ Pixel-Koordinaten Bild erstellt\n";
+    std::cout << " Pixel-Koordinaten Bild erstellt\n";
 }
 
 /**
@@ -74,7 +74,7 @@ void renderRayDirections(int width, int height, const Point& viewerPos) {
     }
     
     canvas.save();
-    std::cout << "✓ Strahl-Richtungen Bild erstellt\n";
+    std::cout << " Strahl-Richtungen Bild erstellt\n";
 }
 
 /**
@@ -117,7 +117,7 @@ void renderRayLengths(int width, int height, const Point& viewerPos) {
     }
     
     canvas.save();
-    std::cout << "✓ Strahl-Längen Bild erstellt\n";
+    std::cout << " Strahl-Längen Bild erstellt\n";
 }
 
 /**
