@@ -41,6 +41,7 @@ set(LIB_SOURCES
     src/Color/Color.cpp
     src/Canvas/Canvas.cpp
     src/Ray/Ray.cpp
+    src/Matrix/Matrix.cpp
 )
 
 # Create a library for shared code
@@ -58,6 +59,7 @@ set(TEST_SOURCES
     tests/PointTests.cpp
     tests/VectorTests.cpp
     tests/ColorTests.cpp
+    tests/MatrixTests.cpp
 )
 
 # Create test executable
