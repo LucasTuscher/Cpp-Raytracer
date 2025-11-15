@@ -1,0 +1,53 @@
+#pragma once
+#include "Shape.h"
+#include "../Intersection/Intersections.h"
+
+/**
+ * Sphere-Klasse
+ *
+ * Repräsentiert eine Einheitskugel im Koordinatenursprung.
+ *
+ * Standard-Eigenschaften:
+ * - Mittelpunkt: (0, 0, 0)
+ * - Radius: 1
+ *
+ * Die Kugel liegt immer im Ursprung mit Radius 1.
+ * Transformationen werden später über Matrizen realisiert.
+ */
+class Sphere : public Shape {
+public:
+    /**
+     * Konstruktor: Erstellt eine Einheitskugel im Ursprung
+     */
+    Sphere() = default;
+
+    /**
+     * Destruktor
+     */
+    ~Sphere() override = default;
+
+    /**
+     * Berechnet die Schnittpunkte zwischen der Kugel und einem Strahl
+     *
+     * Mögliche Fälle:
+     * - Kein Schnittpunkt: Leere Liste
+     * - Tangente: Zwei identische Schnittpunkte
+     * - Zwei Schnittpunkte: Strahl durchquert die Kugel
+     * - Negative t-Werte: Schnittpunkte liegen hinter dem Strahlursprung
+     *
+     * @param ray Der Strahl, mit dem geschnitten werden soll
+     * @return Intersections-Objekt mit allen Schnittpunkten (sortiert)
+     */
+    Intersections intersect(const Ray& ray) const override;
+
+    /**
+     * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche
+     *
+     * Für eine Einheitskugel im Ursprung ist die Normale am Punkt P
+     * einfach der normalisierte Ortsvektor von P.
+     *
+     * @param point Punkt auf der Kugeloberfläche
+     * @return Normalisierter Normalenvektor
+     */
+    Vector normalAt(const Point& point) const override;
+};
