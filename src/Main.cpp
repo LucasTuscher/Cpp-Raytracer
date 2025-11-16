@@ -7,9 +7,10 @@
  * 1. Pixel-Koordinaten (Launch ID) → archiv/
  * 2. Strahl-Richtungen → archiv/
  * 3. Strahl-Längen → archiv/
- * 4. Kugel-Schnittpunkt (Hit/Miss)
- * 5. Kugel-Schnittpunkt t-Wert
- * 6. Kugel-Normalenvektoren
+ * 4. Kugel-Strahlrichtungen (mit 0.01 Verkleinerung)
+ * 5. Kugel-Schnittpunkt (Hit/Miss)
+ * 6. Kugel-Schnittpunkt t-Wert
+ * 7. Kugel-Normalenvektoren
  */
 #include <iostream>
 #include <cmath>
@@ -132,6 +133,49 @@ void renderRayLengths(int width, int height, const Point& viewerPos) {
     
     canvas.save();
     std::cout << " Strahl-Längen Bild erstellt\n";
+}
+
+/**
+ * Erzeugt ein Testbild: Strahlrichtungen für Kugel-Visualisierung
+ *
+ * Kodierung:
+ * - Rot-Kanal: Absolutwert der x-Komponente der Strahlrichtung
+ * - Grün-Kanal: Absolutwert der y-Komponente der Strahlrichtung
+ * - Blau-Kanal: 0 (z-Komponente wird ignoriert)
+ *
+ * Verwendet die künstliche 0.01-Verkleinerung wie bei den anderen Kugel-Tests
+ * Das Bild wird sehr dunkel sein, weil die Strahlen fast geradeaus gehen
+ */
+void renderSphereRayDirections(int width, int height, const Point& viewerPos) {
+    Canvas canvas(width, height, "test-sphere-raydirections");
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Berechne Pixel-Position MIT künstlicher Verkleinerung (0.01)
+            // Genau wie bei den anderen Kugel-Tests
+            double px = 0.01 * ((x + 0.5) - width / 2.0);
+            double py = 0.01 * ((y + 0.5) - height / 2.0);
+            double pz = 0.0;
+
+            Point pixelPos(px, py, pz);
+
+            // Erzeuge Strahl vom Betrachter zum Pixel
+            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
+            Vector dir = ray.getDirection();
+
+            // Kodiere x und y Komponenten als Farbe (z wird ignoriert)
+            // Absolutbeträge, um negative Werte zu vermeiden
+            // Verstärke die Werte mit Faktor 5, damit sie besser sichtbar sind
+            double r = std::abs(dir.x) * 5.0;
+            double g = std::abs(dir.y) * 5.0;
+
+            Color color(r, g, 0.0);
+            canvas.setPixel(x, y, color);
+        }
+    }
+
+    canvas.save();
+    std::cout << " Kugel Strahlrichtungen Bild erstellt\n";
 }
 
 /**
@@ -349,18 +393,21 @@ int main() {
     // ========================================================================
     std::cout << "Kugel-Visualisierungen (→ Hauptordner):\n";
 
-    // Test 4: Kugel Hit/Miss
+    // Test 4: Strahlrichtungen für Kugel-Tests
+    renderSphereRayDirections(width, height, viewerPos);
+
+    // Test 5: Kugel Hit/Miss
     renderSphereHitMiss(width, height, viewerPos);
 
-    // Test 5: Kugel t-Wert
+    // Test 6: Kugel t-Wert
     renderSphereTValue(width, height, viewerPos);
 
-    // Test 6: Kugel Normalenvektoren
+    // Test 7: Kugel Normalenvektoren
     renderSphereNormals(width, height, viewerPos);
 
-    std::cout << "\n=== Alle 6 Bilder erfolgreich erstellt! ===\n";
+    std::cout << "\n=== Alle 7 Bilder erfolgreich erstellt! ===\n";
     std::cout << "Archiv-Bilder (3): archiv/*.ppm\n";
-    std::cout << "Kugel-Bilder (3): *.ppm (Hauptordner)\n";
+    std::cout << "Kugel-Bilder (4): *.ppm (Hauptordner)\n";
     std::cout << "\nDie Bilder wurden im PPM-Format gespeichert.\n";
     std::cout << "Sie können mit den meisten Bildbetrachtungsprogrammen geöffnet werden.\n";
 
