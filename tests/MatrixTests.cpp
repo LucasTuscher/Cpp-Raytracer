@@ -4,8 +4,8 @@
 #include "../src/Point/Point.h"
 #include <cmath>
 
-// Hilfsfunktion für Gleitkomma-Vergleiche
-bool approxEqual(double a, double b, double eps = 1e-5) {
+// Hilfsfunktion für Gleitkomma-Vergleiche (static, um Linker-Fehler zu vermeiden)
+static bool approxEqual(double a, double b, double eps = 1e-5) {
     return std::fabs(a - b) < eps;
 }
 
@@ -599,4 +599,174 @@ TEST(MatrixTests, InvertingNonInvertibleMatrixThrows) {
     });
 
     EXPECT_THROW(M.inverse(), std::runtime_error);
+}
+
+// ========================
+// View-Transformation Tests
+// ========================
+
+/**
+ * Test: View-Transformation für Standard-Orientierung
+ *
+ * Wenn die Kamera im Ursprung steht und entlang der negativen z-Achse schaut,
+ * sollte die View-Transformation die Einheitsmatrix sein.
+ */
+TEST(MatrixTests, ViewTransformForDefaultOrientation) {
+    Point position(0, 0, 0);
+    Point lookAt(0, 0, -1);
+    Vector up(0, 1, 0);
+
+    Matrix transform = Matrix::viewTransform(position, lookAt, up);
+
+    EXPECT_EQ(transform, Matrix::identity(4));
+}
+
+/**
+ * Test: View-Transformation in positive z-Richtung
+ *
+ * Wenn die Kamera in positive z-Richtung schaut (umgekehrt zur Konvention),
+ * sollte die Welt gespiegelt werden.
+ */
+TEST(MatrixTests, ViewTransformLookingInPositiveZDirection) {
+    Point position(0, 0, 0);
+    Point lookAt(0, 0, 1);
+    Vector up(0, 1, 0);
+
+    Matrix transform = Matrix::viewTransform(position, lookAt, up);
+    Matrix expected = Matrix::scale(-1, 1, -1);
+
+    EXPECT_EQ(transform, expected);
+}
+
+/**
+ * Test: View-Transformation bewegt die Welt
+ *
+ * Die View-Transformation verschiebt die Welt, nicht die Kamera.
+ * Wenn die Kamera bei z=8 steht, wird die Welt um -8 verschoben.
+ */
+TEST(MatrixTests, ViewTransformMovesTheWorld) {
+    Point position(0, 0, 8);
+    Point lookAt(0, 0, 0);
+    Vector up(0, 1, 0);
+
+    Matrix transform = Matrix::viewTransform(position, lookAt, up);
+    Matrix expected = Matrix::translate(0, 0, -8);
+
+    EXPECT_EQ(transform, expected);
+}
+
+/**
+ * Test: Beliebige View-Transformation
+ *
+ * Testet eine komplexe View-Transformation mit nicht-trivialen Werten.
+ */
+TEST(MatrixTests, ArbitraryViewTransformation) {
+    Point position(1, 3, 2);
+    Point lookAt(4, -2, 8);
+    Vector up(1, 1, 0);
+
+    Matrix transform = Matrix::viewTransform(position, lookAt, up);
+
+    // Erwartete Matrix (aus dem Tutorial)
+    Matrix expected(4, {
+        -0.50709,  0.50709,  0.67612, -2.36643,
+         0.76772,  0.60609,  0.12122, -2.82843,
+        -0.35857,  0.59761, -0.71714,  0.00000,
+         0.00000,  0.00000,  0.00000,  1.00000
+    });
+
+    // Vergleiche jedes Element mit Toleranz (höhere Toleranz wegen Rundungsfehlern)
+    const double epsilon = 0.05;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            EXPECT_NEAR(transform.at(i, j), expected.at(i, j), epsilon)
+                << "Mismatch at position [" << i << "][" << j << "]";
+        }
+    }
+}
+
+/**
+ * Test: View-Transformation mit verschiedenen Up-Vektoren
+ *
+ * Der Up-Vektor muss nicht exakt senkrecht zur Blickrichtung sein.
+ * Up-Vektoren, die sich nur in der Blickrichtungs-Komponente unterscheiden,
+ * führen zum gleichen Ergebnis (die Komponente wird projiziert).
+ */
+TEST(MatrixTests, ViewTransformWithDifferentUpVectors) {
+    Point position(0, 0, -10);
+    Point lookAt(0, 0, 0);
+
+    // Test mit verschiedenen Up-Vektoren
+    Vector up1(0, 1, 0);    // Standard: y-Achse
+    Vector up2(1, 1, 0);    // Diagonal in xy-Ebene
+    Vector up3(1, 0, 0);    // x-Achse (senkrecht zu up1)
+
+    Matrix transform1 = Matrix::viewTransform(position, lookAt, up1);
+    Matrix transform2 = Matrix::viewTransform(position, lookAt, up2);
+    Matrix transform3 = Matrix::viewTransform(position, lookAt, up3);
+
+    // Alle sollten gültige Transformationen sein (invertierbar)
+    EXPECT_TRUE(transform1.isInvertible());
+    EXPECT_TRUE(transform2.isInvertible());
+    EXPECT_TRUE(transform3.isInvertible());
+
+    // up1 und up2 sind unterschiedlich
+    EXPECT_FALSE(transform1 == transform2);
+    // up1 und up3 sind unterschiedlich (senkrecht zueinander)
+    EXPECT_FALSE(transform1 == transform3);
+    // up2 und up3 sind unterschiedlich
+    EXPECT_FALSE(transform2 == transform3);
+}
+
+/**
+ * Test: View-Transformation erhält orthonormale Basis
+ *
+ * Die durch die View-Transformation erzeugte Basis sollte orthonormal sein.
+ */
+TEST(MatrixTests, ViewTransformProducesOrthonormalBasis) {
+    Point position(5, 5, 5);
+    Point lookAt(0, 0, 0);
+    Vector up(0, 1, 0);
+
+    Matrix transform = Matrix::viewTransform(position, lookAt, up);
+
+    // Extrahiere die Basisvektoren (erste 3 Zeilen)
+    Vector right(transform.at(0, 0), transform.at(0, 1), transform.at(0, 2));
+    Vector trueUp(transform.at(1, 0), transform.at(1, 1), transform.at(1, 2));
+    Vector vpn(transform.at(2, 0), transform.at(2, 1), transform.at(2, 2));
+
+    // Alle sollten Einheitsvektoren sein
+    const double epsilon = 1e-5;
+    EXPECT_NEAR(right.magnitude(), 1.0, epsilon);
+    EXPECT_NEAR(trueUp.magnitude(), 1.0, epsilon);
+    EXPECT_NEAR(vpn.magnitude(), 1.0, epsilon);
+
+    // Alle sollten orthogonal zueinander sein (Skalarprodukt = 0)
+    EXPECT_NEAR(Vector::dot(right, trueUp), 0.0, epsilon);
+    EXPECT_NEAR(Vector::dot(right, vpn), 0.0, epsilon);
+    EXPECT_NEAR(Vector::dot(trueUp, vpn), 0.0, epsilon);
+}
+
+/**
+ * Test: View-Transformation mit Kamera an verschiedenen Positionen
+ */
+TEST(MatrixTests, ViewTransformAtDifferentPositions) {
+    Point lookAt(0, 0, 0);
+    Vector up(0, 1, 0);
+
+    // Kamera links
+    Matrix transform1 = Matrix::viewTransform(Point(-10, 0, 0), lookAt, up);
+    EXPECT_TRUE(transform1.isInvertible());
+
+    // Kamera rechts
+    Matrix transform2 = Matrix::viewTransform(Point(10, 0, 0), lookAt, up);
+    EXPECT_TRUE(transform2.isInvertible());
+
+    // Kamera oben
+    Matrix transform3 = Matrix::viewTransform(Point(0, 10, 0), lookAt, Vector(0, 0, -1));
+    EXPECT_TRUE(transform3.isInvertible());
+
+    // Kamera unten
+    Matrix transform4 = Matrix::viewTransform(Point(0, -10, 0), lookAt, Vector(0, 0, 1));
+    EXPECT_TRUE(transform4.isInvertible());
 }

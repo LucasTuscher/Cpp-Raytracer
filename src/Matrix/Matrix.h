@@ -249,4 +249,88 @@ public:
      * @return n×n Einheitsmatrix
      */
     static Matrix identity(int size = 4);
+
+    /**
+     * Erzeugt eine Translationsmatrix
+     *
+     * Verschiebt Punkte um den Vektor (dx, dy, dz).
+     * Vektoren werden nicht beeinflusst (da w=0).
+     *
+     * @param dx Verschiebung in x-Richtung
+     * @param dy Verschiebung in y-Richtung
+     * @param dz Verschiebung in z-Richtung
+     * @return 4×4 Translationsmatrix
+     */
+    static Matrix translate(double dx, double dy, double dz);
+
+    /**
+     * Erzeugt eine Skalierungsmatrix
+     *
+     * Skaliert Punkte und Vektoren mit den Faktoren sx, sy, sz.
+     *
+     * @param sx Skalierungsfaktor in x-Richtung
+     * @param sy Skalierungsfaktor in y-Richtung
+     * @param sz Skalierungsfaktor in z-Richtung
+     * @return 4×4 Skalierungsmatrix
+     */
+    static Matrix scale(double sx, double sy, double sz);
+
+    /**
+     * Erzeugt eine Skalierungsmatrix (uniform)
+     *
+     * Skaliert gleichmäßig in alle Richtungen.
+     *
+     * @param s Skalierungsfaktor
+     * @return 4×4 Skalierungsmatrix
+     */
+    static Matrix scale(double s);
+
+    /**
+     * Erzeugt eine Rotationsmatrix um die x-Achse
+     *
+     * Rotiert um den Winkel angle (in Radiant) um die x-Achse.
+     *
+     * @param angle Rotationswinkel in Radiant
+     * @return 4×4 Rotationsmatrix
+     */
+    static Matrix rotateX(double angle);
+
+    /**
+     * Erzeugt eine Rotationsmatrix um die y-Achse
+     *
+     * Rotiert um den Winkel angle (in Radiant) um die y-Achse.
+     *
+     * @param angle Rotationswinkel in Radiant
+     * @return 4×4 Rotationsmatrix
+     */
+    static Matrix rotateY(double angle);
+
+    /**
+     * Erzeugt eine Rotationsmatrix um die z-Achse
+     *
+     * Rotiert um den Winkel angle (in Radiant) um die z-Achse.
+     *
+     * @param angle Rotationswinkel in Radiant
+     * @return 4×4 Rotationsmatrix
+     */
+    static Matrix rotateZ(double angle);
+
+    /**
+     * Erzeugt eine View-Transformationsmatrix
+     *
+     * Transformiert Weltkoordinaten in Kamerakoordinaten.
+     * Die Kamera steht an 'position' und schaut auf 'lookAt'.
+     * Der 'up'-Vektor gibt an, wo "oben" ist.
+     *
+     * Koordinatensystem der Kamera:
+     * - n (vpn): Zeigt in die entgegengesetzte Blickrichtung
+     * - u (right): Zeigt nach rechts (senkrecht zu n und v)
+     * - v (trueUp): Zeigt nach oben (senkrecht zu n und u)
+     *
+     * @param position Standpunkt der Kamera
+     * @param lookAt Punkt, auf den die Kamera schaut
+     * @param up Vektor, der ungefähr nach oben zeigt
+     * @return 4×4 View-Transformationsmatrix
+     */
+    static Matrix viewTransform(const Point& position, const Point& lookAt, const Vector& up);
 };

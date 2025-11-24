@@ -46,6 +46,9 @@ set(LIB_SOURCES
     src/Intersection/Intersections.cpp
     src/Shape/Shape.cpp
     src/Shape/Sphere.cpp
+    src/Scene/Scene.cpp
+    src/Camera/Camera.cpp
+    src/RayTracer/RayTracer.cpp
 )
 
 # Create a library for shared code
@@ -57,6 +60,13 @@ target_include_directories(raytracer_lib PUBLIC
 # Link library to main executable
 target_link_libraries(raytracer raytracer_lib)
 
+# Transformation demo executable
+add_executable(transformation_demo src/TransformationDemo.cpp)
+target_link_libraries(transformation_demo raytracer_lib)
+target_include_directories(transformation_demo PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
 # Test files
 set(TEST_SOURCES
     tests/TestMain.cpp
@@ -66,6 +76,8 @@ set(TEST_SOURCES
     tests/MatrixTests.cpp
     tests/IntersectionTests.cpp
     tests/SphereTests.cpp
+    tests/SceneTests.cpp
+    tests/CameraTests.cpp
 )
 
 # Create test executable
@@ -86,3 +98,13 @@ target_include_directories(raytracer_tests PRIVATE
 # Add tests
 include(GoogleTest)
 gtest_discover_tests(raytracer_tests)
+
+# ============================================================================
+# AZTest-Cpp Framework Integration
+# ============================================================================
+
+# Add AZTest library
+add_subdirectory(libs/AZTest-Cpp)
+
+# Add AZTest tests subdirectory
+add_subdirectory(tests_aztest)

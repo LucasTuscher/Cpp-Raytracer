@@ -19,7 +19,13 @@ public:
     /**
      * Konstruktor: Erstellt eine Einheitskugel im Ursprung
      */
-    Sphere() = default;
+    Sphere() : Shape() {}
+
+    /**
+     * Konstruktor mit Namen
+     * @param name Name/ID der Kugel
+     */
+    explicit Sphere(const std::string& name) : Shape(name) {}
 
     /**
      * Destruktor
@@ -27,7 +33,7 @@ public:
     ~Sphere() override = default;
 
     /**
-     * Berechnet die Schnittpunkte zwischen der Kugel und einem Strahl
+     * Berechnet die Schnittpunkte zwischen der Kugel und einem Strahl im lokalen Koordinatensystem
      *
      * Mögliche Fälle:
      * - Kein Schnittpunkt: Leere Liste
@@ -35,10 +41,10 @@ public:
      * - Zwei Schnittpunkte: Strahl durchquert die Kugel
      * - Negative t-Werte: Schnittpunkte liegen hinter dem Strahlursprung
      *
-     * @param ray Der Strahl, mit dem geschnitten werden soll
+     * @param localRay Der Strahl im lokalen Koordinatensystem
      * @return Intersections-Objekt mit allen Schnittpunkten (sortiert)
      */
-    Intersections intersect(const Ray& ray) const override;
+    Intersections localIntersect(const Ray& localRay) const override;
 
     /**
      * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche

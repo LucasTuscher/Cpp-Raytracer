@@ -277,3 +277,87 @@ Matrix Matrix::identity(int size) {
     }
     return result;
 }
+
+// ========================
+// Transformationsmatrizen
+// ========================
+
+Matrix Matrix::translate(double dx, double dy, double dz) {
+    Matrix result = identity(4);
+    result.data_[0][3] = dx;
+    result.data_[1][3] = dy;
+    result.data_[2][3] = dz;
+    return result;
+}
+
+Matrix Matrix::scale(double sx, double sy, double sz) {
+    Matrix result = identity(4);
+    result.data_[0][0] = sx;
+    result.data_[1][1] = sy;
+    result.data_[2][2] = sz;
+    return result;
+}
+
+Matrix Matrix::scale(double s) {
+    return scale(s, s, s);
+}
+
+Matrix Matrix::rotateX(double angle) {
+    Matrix result = identity(4);
+    double c = std::cos(angle);
+    double s = std::sin(angle);
+    result.data_[1][1] = c;
+    result.data_[1][2] = -s;
+    result.data_[2][1] = s;
+    result.data_[2][2] = c;
+    return result;
+}
+
+Matrix Matrix::rotateY(double angle) {
+    Matrix result = identity(4);
+    double c = std::cos(angle);
+    double s = std::sin(angle);
+    result.data_[0][0] = c;
+    result.data_[0][2] = s;
+    result.data_[2][0] = -s;
+    result.data_[2][2] = c;
+    return result;
+}
+
+Matrix Matrix::rotateZ(double angle) {
+    Matrix result = identity(4);
+    double c = std::cos(angle);
+    double s = std::sin(angle);
+    result.data_[0][0] = c;
+    result.data_[0][1] = -s;
+    result.data_[1][0] = s;
+    result.data_[1][1] = c;
+    return result;
+}
+
+Matrix Matrix::viewTransform(const Point& position, const Point& lookAt, const Vector& up) {
+    // 1. View Plane Normal (vpn) berechnen: Zeigt von lookAt zu position
+    Vector vpn = (position - lookAt).normalized();
+
+    // 2. Right-Vektor berechnen: Kreuzprodukt von up und vpn
+    Vector upNormalized = up.normalized();
+    Vector right = Vector::cross(upNormalized, vpn).normalized();
+
+    // 3. True-Up-Vektor berechnen: Kreuzprodukt von vpn und right
+    Vector trueUp = Vector::cross(vpn, right);
+
+    // 4. Orientierungsmatrix erstellen (Basiswechsel)
+    Matrix orientation = identity(4);
+    orientation.data_[0][0] = right.x;
+    orientation.data_[0][1] = right.y;
+    orientation.data_[0][2] = right.z;
+    orientation.data_[1][0] = trueUp.x;
+    orientation.data_[1][1] = trueUp.y;
+    orientation.data_[1][2] = trueUp.z;
+    orientation.data_[2][0] = vpn.x;
+    orientation.data_[2][1] = vpn.y;
+    orientation.data_[2][2] = vpn.z;
+
+    // 5. Mit Translation kombinieren
+    return orientation * translate(-position.x, -position.y, -position.z);
+}

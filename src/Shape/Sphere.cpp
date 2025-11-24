@@ -8,7 +8,7 @@
 #include <cmath>
 
 /**
- * Berechnet die Schnittpunkte zwischen der Kugel und einem Strahl
+ * Berechnet die Schnittpunkte zwischen der Kugel und einem Strahl im lokalen Koordinatensystem
  *
  * Algorithmus:
  * Eine Kugel im Ursprung mit Radius 1 hat die Gleichung: x² + y² + z² = 1
@@ -29,7 +29,7 @@
  * - discriminant = 0: Ein Schnittpunkt (Tangente)
  * - discriminant > 0: Zwei Schnittpunkte
  */
-Intersections Sphere::intersect(const Ray& ray) const {
+Intersections Sphere::localIntersect(const Ray& ray) const {
     // Vektor vom Kugelzentrum (0,0,0) zum Strahlursprung
     Vector sphereToRay = ray.getOrigin() - Point(0, 0, 0);
 

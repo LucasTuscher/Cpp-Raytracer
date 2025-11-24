@@ -1,19 +1,12 @@
 /**
  * Main.cpp
  *
- * Ray Tracer Test-Programm
+ * Ray Tracer - Kapitel 6: Szenen und Kamera
  *
- * Erzeugt Test-Bilder zur Visualisierung von:
- * 1. Pixel-Koordinaten (Launch ID) → archiv/
- * 2. Strahl-Richtungen → archiv/
- * 3. Strahl-Längen → archiv/
- * 4. Kugel-Strahlrichtungen (mit 0.01 Verkleinerung)
- * 5. Kugel-Schnittpunkt (Hit/Miss)
- * 6. Kugel-Schnittpunkt t-Wert
- * 7. Kugel-Normalenvektoren
+ * Demonstriert die Grundstruktur des Raytracers mit verschiedenen Szenen und Kameras.
  */
 #include <iostream>
-#include <cmath>
+#include <memory>
 
 // Platform-spezifische Includes für mkdir
 #ifdef _WIN32
@@ -26,309 +19,11 @@
 #include "Point/Point.h"
 #include "Vector/Vector.h"
 #include "Color/Color.h"
-#include "Canvas/Canvas.h"
-#include "Ray/Ray.h"
+#include "Scene/Scene.h"
+#include "Camera/Camera.h"
+#include "RayTracer/RayTracer.h"
 #include "Shape/Sphere.h"
-#include "Intersection/Intersections.h"
-
-/**
- * Erzeugt ein Testbild: Pixel-Koordinaten als Farbe
- *
- * Kodierung:
- * - Rot-Kanal: x-Koordinate normalisiert (0 bis 1)
- * - Grün-Kanal: y-Koordinate normalisiert (0 bis 1)
- * - Blau-Kanal: 0
- */
-void renderPixelCoordinates(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "archiv/test-pixel-coordinates");
-    
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Normalisiere Pixel-Koordinaten auf [0,1]
-            double r = static_cast<double>(x) / width;
-            double g = static_cast<double>(y) / height;
-            
-            Color color(r, g, 0.0);
-            canvas.setPixel(x, y, color);
-        }
-    }
-    
-    canvas.save();
-    std::cout << " Pixel-Koordinaten Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Strahl-Richtungen als Farbe
- *
- * Kodierung:
- * - Rot-Kanal: Absolut-Wert der x-Komponente der Richtung
- * - Grün-Kanal: Absolut-Wert der y-Komponente der Richtung
- * - Blau-Kanal: Absolut-Wert der z-Komponente der Richtung
- */
-void renderRayDirections(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "archiv/test-ray-directions");
-    
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position im Welt-Koordinatensystem
-            // Bild-Mitte liegt im Ursprung (0, 0, 0)
-            double px = (x + 0.5) - width / 2.0;
-            double py = (y + 0.5) - height / 2.0;
-            double pz = 0.0;
-            
-            Point pixelPos(px, py, pz);
-            
-            // Erzeuge Strahl vom Betrachter zum Pixel
-            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
-            Vector dir = ray.getDirection();
-            
-            // Kodiere Richtung als Farbe (Absolut-Werte)
-            Color color(std::abs(dir.x), std::abs(dir.y), std::abs(dir.z));
-            canvas.setPixel(x, y, color);
-        }
-    }
-    
-    canvas.save();
-    std::cout << " Strahl-Richtungen Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Strahl-Längen als Graustufen
- *
- * Kodierung:
- * - Alle Kanäle: Länge des Strahls vom Betrachter zum Pixel
- *   (normalisiert durch Division durch maximale Länge)
- */
-void renderRayLengths(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "archiv/test-ray-lengths");
-    
-    // Berechne maximale Strahl-Länge (Ecke des Bildes)
-    double cornerX = width / 2.0;
-    double cornerY = height / 2.0;
-    Point corner(cornerX, cornerY, 0.0);
-    Vector toCorner = corner - viewerPos;
-    double maxLength = toCorner.magnitude();
-    
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position im Welt-Koordinatensystem
-            double px = (x + 0.5) - width / 2.0;
-            double py = (y + 0.5) - height / 2.0;
-            double pz = 0.0;
-            
-            Point pixelPos(px, py, pz);
-            
-            // Berechne Abstand vom Betrachter zum Pixel
-            Vector toPixel = pixelPos - viewerPos;
-            double length = toPixel.magnitude();
-            
-            // Normalisiere Länge auf [0,1]
-            double normalized = length / maxLength;
-            
-            // Kodiere als Graustufen
-            Color color(normalized, normalized, normalized);
-            canvas.setPixel(x, y, color);
-        }
-    }
-    
-    canvas.save();
-    std::cout << " Strahl-Längen Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Strahlrichtungen für Kugel-Visualisierung
- *
- * Kodierung:
- * - Rot-Kanal: Absolutwert der x-Komponente der Strahlrichtung
- * - Grün-Kanal: Absolutwert der y-Komponente der Strahlrichtung
- * - Blau-Kanal: 0 (z-Komponente wird ignoriert)
- *
- * Verwendet die künstliche 0.01-Verkleinerung wie bei den anderen Kugel-Tests
- * Das Bild wird sehr dunkel sein, weil die Strahlen fast geradeaus gehen
- */
-void renderSphereRayDirections(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "test-sphere-raydirections");
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position MIT künstlicher Verkleinerung (0.01)
-            // Genau wie bei den anderen Kugel-Tests
-            double px = 0.01 * ((x + 0.5) - width / 2.0);
-            double py = 0.01 * ((y + 0.5) - height / 2.0);
-            double pz = 0.0;
-
-            Point pixelPos(px, py, pz);
-
-            // Erzeuge Strahl vom Betrachter zum Pixel
-            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
-            Vector dir = ray.getDirection();
-
-            // Kodiere x und y Komponenten als Farbe (z wird ignoriert)
-            // Absolutbeträge, um negative Werte zu vermeiden
-            // Verstärke die Werte mit Faktor 5, damit sie besser sichtbar sind
-            double r = std::abs(dir.x) * 5.0;
-            double g = std::abs(dir.y) * 5.0;
-
-            Color color(r, g, 0.0);
-            canvas.setPixel(x, y, color);
-        }
-    }
-
-    canvas.save();
-    std::cout << " Kugel Strahlrichtungen Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Kugel Hit/Miss Visualisierung
- *
- * Kodierung:
- * - Orange: Kugel wurde getroffen
- * - Blau: Kugel wurde nicht getroffen
- */
-void renderSphereHitMiss(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "test-sphere-hitmiss");
-
-    // Kugel im Ursprung mit Radius 1
-    Sphere sphere;
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position (künstlich verkleinert, wie im Skript)
-            double px = 0.01 * ((x + 0.5) - width / 2.0);
-            double py = 0.01 * ((y + 0.5) - height / 2.0);
-            double pz = 0.0;
-
-            Point pixelPos(px, py, pz);
-
-            // Erzeuge Strahl vom Betrachter zum Pixel
-            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
-
-            // Teste auf Schnittpunkt mit Kugel
-            Intersections xs = sphere.intersect(ray);
-
-            // Färbe basierend auf Hit/Miss
-            Color color;
-            if (xs.count() > 0) {
-                color = Color(1.0, 0.5, 0.0); // Orange
-            } else {
-                color = Color(0.0, 0.0, 1.0); // Blau
-            }
-
-            canvas.setPixel(x, y, color);
-        }
-    }
-
-    canvas.save();
-    std::cout << " Kugel Hit/Miss Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Kugel t-Wert Visualisierung
- *
- * Kodierung:
- * - Graustufen: t-Wert - 9 (da alle Schnittpunkte zwischen 9 und 10 liegen)
- * - Schwarz: Kein Schnittpunkt
- */
-void renderSphereTValue(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "test-sphere-tvalue");
-
-    // Kugel im Ursprung mit Radius 1
-    Sphere sphere;
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position (künstlich verkleinert)
-            double px = 0.01 * ((x + 0.5) - width / 2.0);
-            double py = 0.01 * ((y + 0.5) - height / 2.0);
-            double pz = 0.0;
-
-            Point pixelPos(px, py, pz);
-
-            // Erzeuge Strahl vom Betrachter zum Pixel
-            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
-
-            // Teste auf Schnittpunkt mit Kugel
-            Intersections xs = sphere.intersect(ray);
-
-            // Färbe basierend auf t-Wert
-            Color color(0, 0, 0); // Standard: Schwarz (kein Hit)
-
-            if (xs.count() > 0) {
-                // Nimm den kleinsten t-Wert (erster Schnittpunkt)
-                double t = xs[0].t;
-
-                // Subtrahiere 9 und nutze als Graustufen
-                // (da t zwischen ca. 9 und 10 liegt)
-                double gray = t - 9.0;
-                gray = std::max(0.0, std::min(1.0, gray)); // Clamping
-
-                color = Color(gray, gray, gray);
-            }
-
-            canvas.setPixel(x, y, color);
-        }
-    }
-
-    canvas.save();
-    std::cout << " Kugel t-Wert Bild erstellt\n";
-}
-
-/**
- * Erzeugt ein Testbild: Kugel Normalenvektoren Visualisierung
- *
- * Kodierung:
- * - RGB: Absolutbeträge der Normalenvektor-Komponenten
- * - Schwarz: Kein Schnittpunkt
- */
-void renderSphereNormals(int width, int height, const Point& viewerPos) {
-    Canvas canvas(width, height, "test-sphere-normals");
-
-    // Kugel im Ursprung mit Radius 1
-    Sphere sphere;
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Berechne Pixel-Position (künstlich verkleinert)
-            double px = 0.01 * ((x + 0.5) - width / 2.0);
-            double py = 0.01 * ((y + 0.5) - height / 2.0);
-            double pz = 0.0;
-
-            Point pixelPos(px, py, pz);
-
-            // Erzeuge Strahl vom Betrachter zum Pixel
-            Ray ray = Ray::fromPoints(viewerPos, pixelPos);
-
-            // Teste auf Schnittpunkt mit Kugel
-            Intersections xs = sphere.intersect(ray);
-
-            // Färbe basierend auf Normalenvektor
-            Color color(0, 0, 0); // Standard: Schwarz (kein Hit)
-
-            if (xs.count() > 0) {
-                // Nimm den ersten Schnittpunkt
-                double t = xs[0].t;
-
-                // Berechne Schnittpunkt-Position
-                Point hitPoint = ray.pointAt(t);
-
-                // Berechne Normalenvektor an diesem Punkt
-                Vector normal = sphere.normalAt(hitPoint);
-
-                // Kodiere Normalenvektor als Farbe (Absolutbeträge)
-                color = Color(
-                    std::abs(normal.x),
-                    std::abs(normal.y),
-                    std::abs(normal.z)
-                );
-            }
-
-            canvas.setPixel(x, y, color);
-        }
-    }
-
-    canvas.save();
-    std::cout << " Kugel Normalen Bild erstellt\n";
-}
+#include "Matrix/Matrix.h"
 
 /**
  * Erstellt einen Ordner (falls nicht vorhanden)
@@ -342,74 +37,206 @@ void createDirectory(const std::string& path) {
 }
 
 /**
+ * Test 1: Szene mit einer Kugel - Verschiedene Kameraperspektiven
+ */
+void renderSingleSphereTests() {
+    std::cout << "\n=== Test 1: Einzelne Kugel mit verschiedenen Kameras ===\n";
+
+    // Szene erstellen: Eine Kugel mit Radius 0.5 am Ursprung
+    Scene scene;
+    Sphere* sphere = new Sphere("sphere");
+    sphere->setTransform(Matrix::scale(0.5, 0.5, 0.5));
+    scene.addObject(sphere);
+
+    // Test 1a: Kamera füllt Bild knapp bis zum Rand
+    std::cout << "  Rendering: test1a-single-sphere-fullview.ppm\n";
+    Camera camera1(800, 600, 7.7,
+                   Point(0, 0, -10), Point(0, 0, 0), Vector(0, 1, 0));
+    RayTracer raytracer1(&scene, &camera1);
+    raytracer1.render();
+    raytracer1.getRenderTarget().save("test1a-single-sphere-fullview");
+
+    // Test 1b: Quadratisches Bild, Viertel der Kugel oben links
+    std::cout << "  Rendering: test1b-single-sphere-quarter.ppm\n";
+    Camera camera2(600, 600, 11.4,
+                   Point(0, 0, -10), Point(1, 1, 0), Vector(0, 1, 0));
+    RayTracer raytracer2(&scene, &camera2);
+    raytracer2.render();
+    raytracer2.getRenderTarget().save("test1b-single-sphere-quarter");
+
+    // Test 1c: Kugel von Rand zu Rand mit schräger Kamera
+    std::cout << "  Rendering: test1c-single-sphere-angled.ppm\n";
+    Camera camera3(600, 600, 2.7,
+                   Point(10, 10, -10), Point(0, 0, 0), Vector(0, 1, 0));
+    RayTracer raytracer3(&scene, &camera3);
+    raytracer3.render();
+    raytracer3.getRenderTarget().save("test1c-single-sphere-angled");
+
+    // Cleanup
+    delete sphere;
+
+    std::cout << "  Fertig!\n";
+}
+
+/**
+ * Test 2: Szene mit drei Kugeln verschiedener Größen
+ */
+void renderThreeSpheresTest() {
+    std::cout << "\n=== Test 2: Drei Kugeln verschiedener Größen ===\n";
+    std::cout << "  Rendering: test2-three-spheres.ppm\n";
+
+    // Szene erstellen
+    Scene scene;
+
+    // Kugel 1: Radius 1 an Position (-0.5, 1.0, 0.5)
+    Sphere* sphere1 = new Sphere("sphere1");
+    sphere1->setTransform(
+        Matrix::translate(-0.5, 1.0, 0.5) * Matrix::scale(1.0, 1.0, 1.0)
+    );
+    scene.addObject(sphere1);
+
+    // Kugel 2: Radius 0.5 an Position (1.5, 0.5, -0.5)
+    Sphere* sphere2 = new Sphere("sphere2");
+    sphere2->setTransform(
+        Matrix::translate(1.5, 0.5, -0.5) * Matrix::scale(0.5, 0.5, 0.5)
+    );
+    scene.addObject(sphere2);
+
+    // Kugel 3: Radius 0.33 an Position (-1.5, 0.33, -0.75)
+    Sphere* sphere3 = new Sphere("sphere3");
+    sphere3->setTransform(
+        Matrix::translate(-1.5, 0.33, -0.75) * Matrix::scale(0.33, 0.33, 0.33)
+    );
+    scene.addObject(sphere3);
+
+    // Kamera: Von oben schräg auf die Szene
+    Camera camera(800, 400, 60.0,
+                  Point(0.0, 1.5, -5.0), Point(0.0, 1.0, 0.0), Vector(0, 1, 0));
+
+    // Rendering
+    RayTracer raytracer(&scene, &camera);
+    raytracer.render();
+    raytracer.getRenderTarget().save("test2-three-spheres");
+
+    // Cleanup
+    delete sphere1;
+    delete sphere2;
+    delete sphere3;
+
+    std::cout << "  Fertig!\n";
+}
+
+/**
+ * Test 3: Raster von Kugeln (7x7 Gitter)
+ */
+void renderSphereGridTest() {
+    std::cout << "\n=== Test 3: Raster von Kugeln (7x7 Gitter) ===\n";
+    std::cout << "  Rendering: test3-sphere-grid.ppm\n";
+
+    // Szene erstellen
+    Scene scene;
+
+    // Erstelle ein 7x7 Gitter von Kugeln
+    int sphereCount = 0;
+    for (int y = -3; y <= 3; y++) {
+        for (int x = -3; x <= 3; x++) {
+            std::string name = "sphere_" + std::to_string(sphereCount++);
+            Sphere* sphere = new Sphere(name);
+
+            // Transformation: Verschiebung zu (x, y, 0) und Skalierung auf Radius 0.4
+            sphere->setTransform(
+                Matrix::translate(x, y, 0) * Matrix::scale(0.4, 0.4, 0.4)
+            );
+
+            scene.addObject(sphere);
+        }
+    }
+
+    // Kamera: Von vorne auf das Gitter
+    Camera camera(400, 400, 90.0,
+                  Point(0.0, 0.0, -5.0), Point(0.0, 0.0, 0.0), Vector(0, 1, 0));
+
+    // Rendering
+    RayTracer raytracer(&scene, &camera);
+    raytracer.render();
+    raytracer.getRenderTarget().save("test3-sphere-grid");
+
+    // Cleanup
+    for (auto* obj : scene.getObjects()) {
+        delete obj;
+    }
+
+    std::cout << "  Fertig!\n";
+}
+
+/**
+ * Test 4: Verwenden der Standard-Testszene
+ */
+void renderDefaultSceneTest() {
+    std::cout << "\n=== Test 4: Standard-Testszene ===\n";
+    std::cout << "  Rendering: test4-default-scene.ppm\n";
+
+    // Standard-Testszene verwenden
+    Scene* scene = Scene::defaultScene();
+
+    // Einfache Kamera
+    Camera camera(400, 400, 60.0,
+                  Point(0.0, 0.0, -3.0), Point(0.0, 0.0, 0.0), Vector(0, 1, 0));
+
+    // Rendering
+    RayTracer raytracer(scene, &camera);
+    raytracer.render();
+    raytracer.getRenderTarget().save("test4-default-scene");
+
+    // Cleanup
+    for (auto* obj : scene->getObjects()) {
+        delete obj;
+    }
+    delete scene;
+
+    std::cout << "  Fertig!\n";
+}
+
+/**
  * Hauptprogramm
  */
 int main() {
-    std::cout << "=== Ray Tracer - Kapitel 4: Kugeln und Schnitte ===\n\n";
+    std::cout << "============================================\n";
+    std::cout << "  Ray Tracer - Kapitel 6: Szenen & Kamera\n";
+    std::cout << "============================================\n";
 
-    // Erstelle archiv-Ordner für alte Test-Bilder
-    createDirectory("archiv");
+    // Erstelle output-Ordner für die Bilder
+    createDirectory("output");
 
-    // Bild-Einstellungen
-    const int width = 400;
-    const int height = 300;
+    try {
+        // Test 1: Einzelne Kugel mit verschiedenen Kameras
+        renderSingleSphereTests();
 
-    // Betrachter-Position für Kugel-Tests (z = -10)
-    Point viewerPos(0, 0, -10);
+        // Test 2: Drei Kugeln verschiedener Größen
+        renderThreeSpheresTest();
 
-    // Betrachter-Position für Kapitel 2 Tests (z = -100)
-    Point viewerPos2(0, 0, -100);
+        // Test 3: Raster von Kugeln
+        renderSphereGridTest();
 
-    std::cout << "Bildgröße: " << width << " x " << height << "\n";
-    std::cout << "Betrachter-Position Kugel-Tests: ("
-              << viewerPos.x << ", "
-              << viewerPos.y << ", "
-              << viewerPos.z << ")\n";
-    std::cout << "Betrachter-Position Grundlagen-Tests: ("
-              << viewerPos2.x << ", "
-              << viewerPos2.y << ", "
-              << viewerPos2.z << ")\n\n";
+        // Test 4: Standard-Testszene
+        renderDefaultSceneTest();
 
-    std::cout << "Erzeuge Visualisierungen...\n\n";
+        std::cout << "\n============================================\n";
+        std::cout << "  Alle Tests erfolgreich abgeschlossen!\n";
+        std::cout << "============================================\n";
+        std::cout << "\nErzeugte Dateien:\n";
+        std::cout << "  - test1a-single-sphere-fullview.ppm\n";
+        std::cout << "  - test1b-single-sphere-quarter.ppm\n";
+        std::cout << "  - test1c-single-sphere-angled.ppm\n";
+        std::cout << "  - test2-three-spheres.ppm\n";
+        std::cout << "  - test3-sphere-grid.ppm\n";
+        std::cout << "  - test4-default-scene.ppm\n";
+        std::cout << "\nDie Bilder wurden im PPM-Format gespeichert.\n";
 
-    // ========================================================================
-    // Kapitel 2: Grundlegende Tests → archiv/
-    // ========================================================================
-    std::cout << "Grundlagen-Visualisierungen (→ archiv/):\n";
-
-    // Test 1: Pixel-Koordinaten
-    renderPixelCoordinates(width, height, viewerPos2);
-
-    // Test 2: Strahl-Richtungen
-    renderRayDirections(width, height, viewerPos2);
-
-    // Test 3: Strahl-Längen
-    renderRayLengths(width, height, viewerPos2);
-
-    std::cout << "\n";
-
-    // ========================================================================
-    // Kapitel 4: Kugel-Schnittpunkt Tests → Hauptordner
-    // ========================================================================
-    std::cout << "Kugel-Visualisierungen (→ Hauptordner):\n";
-
-    // Test 4: Strahlrichtungen für Kugel-Tests
-    renderSphereRayDirections(width, height, viewerPos);
-
-    // Test 5: Kugel Hit/Miss
-    renderSphereHitMiss(width, height, viewerPos);
-
-    // Test 6: Kugel t-Wert
-    renderSphereTValue(width, height, viewerPos);
-
-    // Test 7: Kugel Normalenvektoren
-    renderSphereNormals(width, height, viewerPos);
-
-    std::cout << "\n=== Alle 7 Bilder erfolgreich erstellt! ===\n";
-    std::cout << "Archiv-Bilder (3): archiv/*.ppm\n";
-    std::cout << "Kugel-Bilder (4): *.ppm (Hauptordner)\n";
-    std::cout << "\nDie Bilder wurden im PPM-Format gespeichert.\n";
-    std::cout << "Sie können mit den meisten Bildbetrachtungsprogrammen geöffnet werden.\n";
+    } catch (const std::exception& e) {
+        std::cerr << "\nFEHLER: " << e.what() << "\n";
+        return 1;
+    }
 
     return 0;
 }

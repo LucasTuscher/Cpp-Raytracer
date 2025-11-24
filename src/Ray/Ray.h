@@ -2,6 +2,9 @@
 #include "../Point/Point.h"
 #include "../Vector/Vector.h"
 
+// Forward declaration
+class Matrix;
+
 /**
  * Ray-Klasse
  * 
@@ -82,4 +85,16 @@ public:
     bool operator!=(const Ray& r) const {
         return !(*this == r);
     }
+
+    /**
+     * Transformiert den Strahl mit einer Transformationsmatrix
+     *
+     * Multipliziert Ursprung und Richtung mit der gegebenen Matrix.
+     * WICHTIG: Der Richtungsvektor wird NICHT normalisiert!
+     * Bei Skalierungen wird der Strahl gestreckt oder gestaucht.
+     *
+     * @param trafo Transformationsmatrix
+     * @return Transformierter Strahl
+     */
+    Ray transform(const Matrix& trafo) const;
 };

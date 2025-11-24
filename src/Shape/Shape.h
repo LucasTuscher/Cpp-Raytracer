@@ -2,6 +2,8 @@
 #include "../Ray/Ray.h"
 #include "../Vector/Vector.h"
 #include "../Point/Point.h"
+#include "../Matrix/Matrix.h"
+#include <string>
 
 // Forward declaration
 class Intersections;
@@ -12,29 +14,113 @@ class Intersections;
  * Oberklasse für alle geometrischen Objekte im Ray Tracer.
  *
  * Alle geometrischen Objekte müssen folgende Funktionen implementieren:
- * - intersect(): Berechnung der Schnittpunkte mit einem Strahl
+ * - localIntersect(): Berechnung der Schnittpunkte im lokalen Koordinatensystem
  * - normalAt(): Berechnung des Normalenvektors an einem Punkt
  *
  * Standard-Eigenschaften:
  * - Objekte liegen in ihrer Standard-Größe und -Lage (z.B. Einheitskugel im Ursprung)
- * - Transformationen werden später über Matrizen realisiert
+ * - Transformationen werden über Matrizen realisiert
  */
 class Shape {
+protected:
+    Matrix transformation_;        // Transformationsmatrix (default: Einheitsmatrix)
+    mutable Matrix* cachedInverse_; // Gecachte inverse Transformation
+    mutable bool inverseCached_;   // Flag ob Inverse gecacht ist
+    std::string name_;             // Name/ID des Objekts
+
+private:
+    static int nextId_;            // Statischer Zähler für automatische IDs
+
 public:
+    /**
+     * Konstruktor: Initialisiert mit Einheitsmatrix und generiertem Namen
+     */
+    Shape()
+        : transformation_(Matrix::identity(4)),
+          cachedInverse_(nullptr),
+          inverseCached_(false),
+          name_("Shape_" + std::to_string(nextId_++)) {}
+
+    /**
+     * Konstruktor mit Namen
+     * @param name Name/ID des Objekts
+     */
+    explicit Shape(const std::string& name)
+        : transformation_(Matrix::identity(4)),
+          cachedInverse_(nullptr),
+          inverseCached_(false),
+          name_(name) {}
+
     /**
      * Virtueller Destruktor für korrekte Polymorphie
      */
-    virtual ~Shape() = default;
+    virtual ~Shape() {
+        if (cachedInverse_ != nullptr) {
+            delete cachedInverse_;
+        }
+    }
 
     /**
-     * Berechnet die Schnittpunkte zwischen diesem Objekt und einem Strahl
+     * Setzt die Transformationsmatrix des Objekts
+     *
+     * @param trafo Die neue Transformationsmatrix
+     */
+    void setTransform(const Matrix& trafo) {
+        transformation_ = trafo;
+        // Cache invalidieren
+        if (cachedInverse_ != nullptr) {
+            delete cachedInverse_;
+            cachedInverse_ = nullptr;
+        }
+        inverseCached_ = false;
+    }
+
+    /**
+     * Gibt die Transformationsmatrix zurück
+     *
+     * @return Transformationsmatrix
+     */
+    const Matrix& getTransform() const {
+        return transformation_;
+    }
+
+    /**
+     * Setzt den Namen des Objekts
+     *
+     * @param name Neuer Name
+     */
+    void setName(const std::string& name) {
+        name_ = name;
+    }
+
+    /**
+     * Gibt den Namen des Objekts zurück
+     *
+     * @return Name/ID
+     */
+    const std::string& getName() const {
+        return name_;
+    }
+
+    /**
+     * Berechnet die Schnittpunkte zwischen diesem Objekt und einem Strahl (Weltkoordinaten)
+     *
+     * Transformiert den Strahl ins lokale Koordinatensystem und ruft dann localIntersect() auf.
+     *
+     * @param worldRay Der Strahl in Weltkoordinaten
+     * @return Intersections-Objekt mit allen Schnittpunkten (sortiert nach t-Wert)
+     */
+    Intersections intersect(const Ray& worldRay) const;
+
+    /**
+     * Berechnet die Schnittpunkte im lokalen Koordinatensystem
      *
      * Diese Methode muss von allen abgeleiteten Klassen implementiert werden.
      *
-     * @param ray Der Strahl, mit dem geschnitten werden soll
+     * @param localRay Der Strahl im lokalen Koordinatensystem
      * @return Intersections-Objekt mit allen Schnittpunkten (sortiert nach t-Wert)
      */
-    virtual Intersections intersect(const Ray& ray) const = 0;
+    virtual Intersections localIntersect(const Ray& localRay) const = 0;
 
     /**
      * Berechnet den Normalenvektor an einem Punkt auf der Oberfläche

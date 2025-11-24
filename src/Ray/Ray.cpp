@@ -1,9 +1,10 @@
 /**
  * Ray.cpp
- * 
+ *
  * Implementierung der Ray-Klasse für Strahlverfolgung.
  */
 #include "Ray.h"
+#include "../Matrix/Matrix.h"
 
 /**
  * Konstruktor: Strahl aus Ursprung und Richtung
@@ -27,9 +28,22 @@ Ray Ray::fromPoints(const Point& origin, const Point& target) {
 
 /**
  * Berechnet einen Punkt auf dem Strahl
- * 
+ *
  * Verwendet die Parameterform: P(t) = O + t * d
  */
 Point Ray::pointAt(double t) const {
     return origin + direction * t;
+}
+
+/**
+ * Transformiert den Strahl mit einer Transformationsmatrix
+ *
+ * Der Richtungsvektor wird NICHT normalisiert, damit bei Skalierungen
+ * die t-Werte korrekt bleiben.
+ */
+Ray Ray::transform(const Matrix& trafo) const {
+    Point newOrigin = trafo * origin;
+    Vector newDirection = trafo * direction;
+    // WICHTIG: Nicht normalisieren!
+    return Ray(newOrigin, newDirection);
 }
