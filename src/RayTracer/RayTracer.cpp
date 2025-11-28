@@ -38,23 +38,24 @@ void RayTracer::render() {
             // 1. Erzeuge einen Strahl von der Kamera durch das Pixel
             Ray ray = camera_->rayForPixel(x, y);
 
-            // 2. Berechne Schnittpunkte mit allen Objekten der Szene
-            Intersections intersections = scene_->traceRay(ray);
+            // 2. Berechne die Farbe mit Beleuchtung
+            // Scene::colorAt() führt Strahlverfolgung und Beleuchtungsberechnung durch
+            Color pixelColor = scene_->colorAt(ray);
 
-            // 3. Bestimme den sichtbaren Schnittpunkt
-            const Intersection* hit = intersections.hit();
+            // Falls keine Lichtquellen in der Szene sind, verwende Fallback-Farben
+            if (scene_->getLightCount() == 0) {
+                // Alte Logik für Szenen ohne Beleuchtung
+                Intersections intersections = scene_->traceRay(ray);
+                const Intersection* hit = intersections.hit();
 
-            // 4. Berechne die Farbe für dieses Pixel
-            Color pixelColor;
-            if (hit != nullptr) {
-                // Treffer: Verwende Hit-Farbe
-                pixelColor = hitColor_;
-            } else {
-                // Kein Treffer: Verwende Miss-Farbe (Hintergrund)
-                pixelColor = missColor_;
+                if (hit != nullptr) {
+                    pixelColor = hitColor_;
+                } else {
+                    pixelColor = missColor_;
+                }
             }
 
-            // 5. Schreibe die Farbe in den Canvas
+            // 3. Schreibe die Farbe in den Canvas
             renderTarget_.setPixel(x, y, pixelColor);
         }
     }

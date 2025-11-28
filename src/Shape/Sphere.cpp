@@ -61,16 +61,16 @@ Intersections Sphere::localIntersect(const Ray& ray) const {
 }
 
 /**
- * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche
+ * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche (lokal)
  *
  * Für eine Einheitskugel im Ursprung ist die Normale am Punkt P
  * gleich dem Ortsvektor von P (da die Kugel im Ursprung liegt und Radius 1 hat).
  *
  * Der Vektor wird normalisiert zurückgegeben.
  */
-Vector Sphere::normalAt(const Point& point) const {
+Vector Sphere::localNormalAt(const Point& localPoint) const {
     // Für eine Einheitskugel im Ursprung: Normale = Punkt - Zentrum
-    Vector normal = point - Point(0, 0, 0);
+    Vector normal = localPoint - Point(0, 0, 0);
 
     // Normalisieren (sollte eigentlich schon Länge 1 haben, aber sicherheitshalber)
     return normal.normalized();

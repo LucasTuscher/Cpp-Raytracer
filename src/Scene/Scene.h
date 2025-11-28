@@ -2,6 +2,10 @@
 #include "../Shape/Shape.h"
 #include "../Ray/Ray.h"
 #include "../Intersection/Intersections.h"
+#include "../Intersection/Intersection.h"
+#include "../LightSource/LightSource.h"
+#include "../LightSource/PointLightSource.h"
+#include "../HitInfo/HitInfo.h"
 #include <map>
 #include <vector>
 #include <memory>
@@ -25,6 +29,9 @@ private:
 
     // Liste aller Objekte für Iteration
     std::vector<Shape*> objects_;
+
+    // Liste aller Lichtquellen
+    std::vector<LightSource*> lights_;
 
 public:
     /**
@@ -95,6 +102,82 @@ public:
      * @return Intersections-Objekt mit allen Schnittpunkten (sortiert)
      */
     Intersections traceRay(const Ray& ray) const;
+
+    /**
+     * Fügt eine Lichtquelle zur Szene hinzu
+     *
+     * Die Szene übernimmt KEINE Besitzrechte an der Lichtquelle.
+     *
+     * @param light Zeiger auf die hinzuzufügende Lichtquelle
+     */
+    void addLight(LightSource* light);
+
+    /**
+     * Prüft, ob eine bestimmte Lichtquelle in der Szene enthalten ist
+     *
+     * @param light Zeiger auf die zu suchende Lichtquelle
+     * @return true wenn die Lichtquelle in der Szene enthalten ist
+     */
+    bool containsLight(const LightSource* light) const;
+
+    /**
+     * Gibt die Anzahl der Lichtquellen in der Szene zurück
+     *
+     * @return Anzahl der Lichtquellen
+     */
+    size_t getLightCount() const;
+
+    /**
+     * Gibt die Liste aller Lichtquellen zurück
+     *
+     * @return Referenz auf den Vektor aller Lichtquellen
+     */
+    const std::vector<LightSource*>& getLights() const;
+
+    /**
+     * Gibt die erste Lichtquelle zurück (für Szenen mit nur einer Lichtquelle)
+     *
+     * @return Zeiger auf die erste Lichtquelle oder nullptr wenn keine vorhanden
+     */
+    LightSource* getFirstLight() const;
+
+    /**
+     * Berechnet HitInfo aus einem Intersection und einem Ray
+     *
+     * Sammelt alle Informationen, die für die Beleuchtungsberechnung benötigt werden:
+     * - t-Wert und geschnittenes Objekt (aus Intersection)
+     * - Schnittpunkt (berechnet aus Ray und t)
+     * - Eye-Vektor (negierte Ray-Richtung)
+     * - Normale (berechnet am Schnittpunkt)
+     *
+     * @param intersection Die Intersection, die den Schnittpunkt beschreibt
+     * @param ray Der Strahl, der das Objekt trifft
+     * @return HitInfo mit allen berechneten Werten
+     */
+    static HitInfo computeHitInfo(const Intersection& intersection, const Ray& ray);
+
+    /**
+     * Berechnet die Farbe an einem Schnittpunkt mit Beleuchtung
+     *
+     * Verwendet das Phong-Beleuchtungsmodell mit allen Lichtquellen der Szene.
+     *
+     * @param hitInfo Informationen über den Schnittpunkt
+     * @return Die berechnete Farbe
+     */
+    Color shadeHit(const HitInfo& hitInfo) const;
+
+    /**
+     * Berechnet die Farbe für einen Strahl
+     *
+     * Kombiniert Strahlverfolgung und Beleuchtungsberechnung:
+     * 1. Findet den nächsten Schnittpunkt mit traceRay()
+     * 2. Berechnet HitInfo mit computeHitInfo()
+     * 3. Berechnet Farbe mit shadeHit()
+     *
+     * @param ray Der Strahl in Weltkoordinaten
+     * @return Die berechnete Farbe (schwarz wenn kein Schnittpunkt)
+     */
+    Color colorAt(const Ray& ray) const;
 
     /**
      * Erstellt eine Standard-Testszene

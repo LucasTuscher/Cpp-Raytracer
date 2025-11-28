@@ -49,6 +49,7 @@ set(LIB_SOURCES
     src/Scene/Scene.cpp
     src/Camera/Camera.cpp
     src/RayTracer/RayTracer.cpp
+    src/Material/Material.cpp
 )
 
 # Create a library for shared code
@@ -64,6 +65,13 @@ target_link_libraries(raytracer raytracer_lib)
 add_executable(transformation_demo src/TransformationDemo.cpp)
 target_link_libraries(transformation_demo raytracer_lib)
 target_include_directories(transformation_demo PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Lighting demo executable (Kapitel 7: Beleuchtung)
+add_executable(raytracer_lighting src/MainLighting.cpp)
+target_link_libraries(raytracer_lighting raytracer_lib)
+target_include_directories(raytracer_lighting PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 

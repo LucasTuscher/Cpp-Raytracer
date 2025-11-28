@@ -47,13 +47,13 @@ public:
     Intersections localIntersect(const Ray& localRay) const override;
 
     /**
-     * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche
+     * Berechnet den Normalenvektor an einem Punkt auf der Kugeloberfläche (lokal)
      *
      * Für eine Einheitskugel im Ursprung ist die Normale am Punkt P
      * einfach der normalisierte Ortsvektor von P.
      *
-     * @param point Punkt auf der Kugeloberfläche
+     * @param localPoint Punkt auf der Kugeloberfläche im lokalen Koordinatensystem
      * @return Normalisierter Normalenvektor
      */
-    Vector normalAt(const Point& point) const override;
+    Vector localNormalAt(const Point& localPoint) const override;
 };

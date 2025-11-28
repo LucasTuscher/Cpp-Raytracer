@@ -188,8 +188,24 @@ public:
     }
 
     /**
+     * Reflektiert einen Vektor an einer Normalen
+     *
+     * Berechnet den reflektierten Vektor nach der Formel:
+     * r = e - 2(e · n)n
+     *
+     * wobei e der einfallende Vektor und n die Normale ist.
+     *
+     * @param incident Der einfallende Vektor
+     * @param normal Die Normale (sollte normalisiert sein)
+     * @return Der reflektierte Vektor
+     */
+    static Vector reflect(const Vector& incident, const Vector& normal) {
+        return incident - normal * 2.0 * dot(incident, normal);
+    }
+
+    /**
      * Gibt den Nullvektor zurück
-     * 
+     *
      * @return Vektor (0, 0, 0)
      */
     static Vector ZERO() { return Vector(0,0,0); }

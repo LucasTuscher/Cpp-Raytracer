@@ -3,6 +3,7 @@
 #include "../Vector/Vector.h"
 #include "../Point/Point.h"
 #include "../Matrix/Matrix.h"
+#include "../Material/Material.h"
 #include <string>
 
 // Forward declaration
@@ -27,6 +28,7 @@ protected:
     mutable Matrix* cachedInverse_; // Gecachte inverse Transformation
     mutable bool inverseCached_;   // Flag ob Inverse gecacht ist
     std::string name_;             // Name/ID des Objekts
+    Material material_;            // Material des Objekts
 
 private:
     static int nextId_;            // Statischer Zähler für automatische IDs
@@ -103,6 +105,33 @@ public:
     }
 
     /**
+     * Setzt das Material des Objekts
+     *
+     * @param material Neues Material
+     */
+    void setMaterial(const Material& material) {
+        material_ = material;
+    }
+
+    /**
+     * Gibt das Material des Objekts zurück
+     *
+     * @return Material
+     */
+    Material& getMaterial() {
+        return material_;
+    }
+
+    /**
+     * Gibt das Material des Objekts zurück (const)
+     *
+     * @return Material
+     */
+    const Material& getMaterial() const {
+        return material_;
+    }
+
+    /**
      * Berechnet die Schnittpunkte zwischen diesem Objekt und einem Strahl (Weltkoordinaten)
      *
      * Transformiert den Strahl ins lokale Koordinatensystem und ruft dann localIntersect() auf.
@@ -123,15 +152,25 @@ public:
     virtual Intersections localIntersect(const Ray& localRay) const = 0;
 
     /**
-     * Berechnet den Normalenvektor an einem Punkt auf der Oberfläche
+     * Berechnet den Normalenvektor an einem Punkt auf der Oberfläche (Weltkoordinaten)
+     *
+     * Transformiert den Punkt ins lokale Koordinatensystem, berechnet die lokale Normale
+     * und transformiert diese zurück ins Weltkoordinatensystem.
+     *
+     * @param worldPoint Punkt auf der Oberfläche in Weltkoordinaten
+     * @return Normalisierter Normalenvektor in Weltkoordinaten
+     */
+    Vector normalAt(const Point& worldPoint) const;
+
+    /**
+     * Berechnet den Normalenvektor im lokalen Koordinatensystem
      *
      * Diese Methode muss von allen abgeleiteten Klassen implementiert werden.
-     * Es wird davon ausgegangen, dass der Punkt auf der Oberfläche liegt.
      *
-     * @param point Punkt auf der Oberfläche des Objekts
-     * @return Normalisierter Normalenvektor an diesem Punkt
+     * @param localPoint Punkt auf der Oberfläche im lokalen Koordinatensystem
+     * @return Normalisierter Normalenvektor im lokalen Koordinatensystem
      */
-    virtual Vector normalAt(const Point& point) const = 0;
+    virtual Vector localNormalAt(const Point& localPoint) const = 0;
 
     /**
      * Gleichheitsvergleich (für Tests)
