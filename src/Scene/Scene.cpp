@@ -165,34 +165,71 @@ HitInfo Scene::computeHitInfo(const Intersection& intersection, const Ray& ray) 
 /**
  * Berechnet die Farbe an einem Schnittpunkt mit Beleuchtung
  */
-Color Scene::shadeHit(const HitInfo& hitInfo) const {
+Color Scene::shadeHit(const HitInfo& hitInfo, int depth) const {
     // Akkumuliere Farben von allen Lichtquellen
-    Color finalColor = Color(0, 0, 0);
+    Color surfaceColor = Color(0, 0, 0);
 
     // Hole Material des getroffenen Objekts
     const Material& material = hitInfo.shape->getMaterial();
 
     // Für jede Lichtquelle in der Szene
     for (const auto& light : lights_) {
+        // Schatten prüfen
+        bool inShadow = isInShadow(hitInfo.pointPlus, light);
+
         // Berechne Beleuchtung mit Phong-Modell
         Color lightContribution = material.phongLighting(
             light,
             hitInfo.point,
             hitInfo.eyeVector,
-            hitInfo.normal
+            hitInfo.normal,
+            inShadow
         );
 
         // Addiere zur Gesamtfarbe
-        finalColor = finalColor + lightContribution;
+        surfaceColor = surfaceColor + lightContribution;
     }
 
-    return finalColor;
+    // Berechne reflektierte Farbe und füge sie hinzu
+    Color reflectedContribution = reflectedColor(hitInfo, depth);
+    surfaceColor = surfaceColor + reflectedContribution;
+
+    return surfaceColor;
+}
+
+/**
+ * Berechnet die reflektierte Farbe an einem Schnittpunkt
+ */
+Color Scene::reflectedColor(const HitInfo& hitInfo, int depth) const {
+    // Wenn Rekursionstiefe erschöpft ist, keine weitere Reflexion
+    if (depth <= 0) {
+        return Color(0, 0, 0);
+    }
+
+    // Hole Material-Reflexivität
+    const Material& material = hitInfo.shape->getMaterial();
+    double reflectivity = material.reflectivity;
+
+    // Wenn Material nicht reflektiert, gib schwarz zurück
+    if (reflectivity <= 0.0) {
+        return Color(0, 0, 0);
+    }
+
+    // Erstelle reflektierten Strahl vom Schnittpunkt aus
+    // Verwende pointPlus um Selbst-Intersektionen zu vermeiden (shadow acne)
+    Ray reflectedRay(hitInfo.pointPlus, hitInfo.reflectVector);
+
+    // Berechne Farbe des reflektierten Strahls (mit reduzierter Tiefe)
+    Color reflectedColor = colorAt(reflectedRay, depth - 1);
+
+    // Multipliziere mit Reflexivität des Materials
+    return reflectedColor * reflectivity;
 }
 
 /**
  * Berechnet die Farbe für einen Strahl
  */
-Color Scene::colorAt(const Ray& ray) const {
+Color Scene::colorAt(const Ray& ray, int depth) const {
     // 1. Finde alle Schnittpunkte
     Intersections intersections = traceRay(ray);
 
@@ -207,8 +244,37 @@ Color Scene::colorAt(const Ray& ray) const {
     // 4. Berechne HitInfo
     HitInfo hitInfo = computeHitInfo(*hit, ray);
 
-    // 5. Berechne Farbe mit Beleuchtung
-    return shadeHit(hitInfo);
+    // 5. Berechne Farbe mit Beleuchtung und Reflexion
+    return shadeHit(hitInfo, depth);
+}
+
+/**
+ * Prüft, ob ein Punkt im Schatten einer Lichtquelle liegt
+ */
+bool Scene::isInShadow(const Point& point, const LightSource* light) const {
+    if (light == nullptr) {
+        return false;
+    }
+
+    // Richtung und Distanz zur Lichtquelle
+    Vector directionToLight = light->directionToPoint(point);
+    double distanceToLight = light->distanceToPoint(point);
+
+    // Kleines Epsilon, um Self-Intersections zu vermeiden
+    Point shadowOrigin = point + directionToLight * 1e-4;
+    Ray shadowRay(shadowOrigin, directionToLight);
+
+    // Schnittpunkte entlang des Schattenstrahls
+    Intersections xs = traceRay(shadowRay);
+    const Intersection* hit = xs.hit();
+
+    // Wenn kein Hit: kein Schatten
+    if (hit == nullptr) {
+        return false;
+    }
+
+    // Bei gerichteten Lichtern ist distanceToLight = inf, jeder positive Hit bedeutet Schatten
+    return hit->t >= 0.0 && hit->t < distanceToLight;
 }
 
 /**

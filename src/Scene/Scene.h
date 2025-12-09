@@ -162,9 +162,10 @@ public:
      * Verwendet das Phong-Beleuchtungsmodell mit allen Lichtquellen der Szene.
      *
      * @param hitInfo Informationen über den Schnittpunkt
+     * @param depth Rekursionstiefe für Reflexionen (Standard: 5)
      * @return Die berechnete Farbe
      */
-    Color shadeHit(const HitInfo& hitInfo) const;
+    Color shadeHit(const HitInfo& hitInfo, int depth = 5) const;
 
     /**
      * Berechnet die Farbe für einen Strahl
@@ -175,9 +176,30 @@ public:
      * 3. Berechnet Farbe mit shadeHit()
      *
      * @param ray Der Strahl in Weltkoordinaten
+     * @param depth Rekursionstiefe für Reflexionen (Standard: 5)
      * @return Die berechnete Farbe (schwarz wenn kein Schnittpunkt)
      */
-    Color colorAt(const Ray& ray) const;
+    Color colorAt(const Ray& ray, int depth = 5) const;
+
+    /**
+     * Berechnet die reflektierte Farbe an einem Schnittpunkt
+     *
+     * Verfolgt einen reflektierten Strahl und berechnet dessen Farbwert.
+     * Die Reflexivität des Materials bestimmt, wie stark der Beitrag ist.
+     *
+     * @param hitInfo Informationen über den Schnittpunkt
+     * @param depth Verbleibende Rekursionstiefe
+     * @return Die reflektierte Farbe (gewichtet mit Material-Reflexivität)
+     */
+    Color reflectedColor(const HitInfo& hitInfo, int depth) const;
+
+    /**
+     * Prüft, ob ein Punkt im Schatten einer Lichtquelle liegt.
+     *
+     * Sendet einen Schattenstrahl vom Punkt zur Lichtquelle und prüft, ob ein
+     * Objekt davor liegt.
+     */
+    bool isInShadow(const Point& point, const LightSource* light) const;
 
     /**
      * Erstellt eine Standard-Testszene

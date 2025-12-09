@@ -26,22 +26,24 @@
 Color Material::phongLighting(const LightSource* light,
                               const Point& point,
                               const Vector& eyeVector,
-                              const Vector& normalVector) const {
-    // Für Punktlichtquellen müssen wir die Position kennen
-    const PointLightSource* pointLight = dynamic_cast<const PointLightSource*>(light);
-    if (pointLight == nullptr) {
-        // Wenn keine Punktlichtquelle, gib nur ambiente Beleuchtung zurück
-        return color * ambient;
+                              const Vector& normalVector,
+                              bool inShadow) const {
+    // Lichtfarbe am Punkt (berücksichtigt Intensität und ggf. Attenuation)
+    Color lightColorAtPoint = light->colorAtPoint(point);
+
+    // Effektive Farbe: Objektfarbe * Lichtfarbe am Punkt
+    Color effectiveColor = color * lightColorAtPoint;
+
+    // 1. Ambiente Komponente (immer vorhanden, auch im Schatten)
+    Color ambientContribution = effectiveColor * ambient;
+
+    // Wenn der Punkt im Schatten liegt, gibt es nur die ambiente Komponente
+    if (inShadow) {
+        return ambientContribution;
     }
 
-    // Effektive Farbe: Objektfarbe * Lichtfarbe * Lichtintensität
-    Color effectiveColor = color * light->getColor() * light->getIntensity();
-
     // Vektor zur Lichtquelle (normalisiert)
-    Vector lightVector = (pointLight->getPosition() - point).normalized();
-
-    // 1. Ambiente Komponente
-    Color ambientContribution = effectiveColor * ambient;
+    Vector lightVector = light->directionFromPoint(point);
 
     // Cosinus des Winkels zwischen Normale und Lichtvektor
     double lightDotNormal = Vector::dot(lightVector, normalVector);
@@ -67,8 +69,70 @@ Color Material::phongLighting(const LightSource* light,
             // 3. Spekulare Komponente
             double factor = std::pow(reflectDotEye, shininess);
             // Spekulare Reflexion verwendet nur die Lichtfarbe, nicht die Objektfarbe
-            Color lightColor = light->getColor() * light->getIntensity();
-            specularContribution = lightColor * specular * factor;
+            specularContribution = lightColorAtPoint * specular * factor;
+        }
+    }
+
+    // Alle Komponenten addieren
+    return ambientContribution + diffuseContribution + specularContribution;
+}
+
+/**
+ * Berechnet die Beleuchtung nach dem Blinn-Phong-Modell
+ *
+ * Blinn-Phong verwendet die Winkelhalbierende (halfway vector) h
+ * anstatt des reflektierten Vektors. Das macht die Berechnung etwas schneller.
+ *
+ * h = normalize(l + v)
+ * Specularer Anteil: (n · h)^(4*shininess)
+ */
+Color Material::blinnPhongLighting(const LightSource* light,
+                                   const Point& point,
+                                   const Vector& eyeVector,
+                                   const Vector& normalVector,
+                                   bool inShadow) const {
+    // Lichtfarbe am Punkt (berücksichtigt Intensität und ggf. Attenuation)
+    Color lightColorAtPoint = light->colorAtPoint(point);
+
+    // Effektive Farbe: Objektfarbe * Lichtfarbe am Punkt
+    Color effectiveColor = color * lightColorAtPoint;
+
+    // 1. Ambiente Komponente (immer vorhanden, auch im Schatten)
+    Color ambientContribution = effectiveColor * ambient;
+
+    // Wenn der Punkt im Schatten liegt, gibt es nur die ambiente Komponente
+    if (inShadow) {
+        return ambientContribution;
+    }
+
+    // Vektor zur Lichtquelle (normalisiert)
+    Vector lightVector = light->directionFromPoint(point);
+
+    // Cosinus des Winkels zwischen Normale und Lichtvektor
+    double lightDotNormal = Vector::dot(lightVector, normalVector);
+
+    Color diffuseContribution = Color(0, 0, 0);
+    Color specularContribution = Color(0, 0, 0);
+
+    // Wenn Licht von der Rückseite kommt (lightDotNormal < 0),
+    // gibt es keine diffuse und spekulare Reflexion
+    if (lightDotNormal >= 0) {
+        // 2. Diffuse Komponente (identisch zu Phong)
+        diffuseContribution = effectiveColor * diffuse * lightDotNormal;
+
+        // Winkelhalbierende zwischen Lichtvektor und Eye-Vektor
+        Vector halfwayVector = (lightVector + eyeVector).normalized();
+
+        // Cosinus des Winkels zwischen Normale und Halfway-Vektor
+        double halfwayDotNormal = Vector::dot(halfwayVector, normalVector);
+
+        // Spekulare Komponente nur wenn halfwayDotNormal > 0
+        if (halfwayDotNormal > 0) {
+            // 3. Spekulare Komponente (Blinn-Phong)
+            // Shininess wird mit 4 multipliziert, da der Winkel etwa halb so groß ist
+            double factor = std::pow(halfwayDotNormal, shininess * 4.0);
+            // Spekulare Reflexion verwendet nur die Lichtfarbe, nicht die Objektfarbe
+            specularContribution = lightColorAtPoint * specular * factor;
         }
     }
 

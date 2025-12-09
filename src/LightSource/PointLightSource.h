@@ -1,6 +1,9 @@
 #pragma once
 #include "LightSource.h"
 #include "../Point/Point.h"
+#include "../Vector/Vector.h"
+#include <cmath>
+#include <limits>
 
 /**
  * PointLightSource-Klasse
@@ -48,6 +51,54 @@ public:
      * @param position Neue Position
      */
     void setPosition(const Point& position) { position_ = position; }
+
+    /**
+     * Punktlichtquellen sind nicht gerichtet
+     * @return false
+     */
+    bool isDirectional() const override {
+        return false;
+    }
+
+    /**
+     * Berechnet den normalisierten Vektor vom Punkt zur Lichtquelle
+     * @param p Der Punkt auf der Oberfläche
+     * @return Normalisierter Vektor vom Punkt zur Lichtquelle
+     */
+    Vector directionFromPoint(const Point& p) const override {
+        return (position_ - p).normalized();
+    }
+
+    /**
+     * Berechnet den normalisierten Vektor von der Lichtquelle zum Punkt
+     * @param p Der Punkt auf der Oberfläche
+     * @return Normalisierter Vektor von der Lichtquelle zum Punkt
+     */
+    Vector directionToPoint(const Point& p) const override {
+        return (p - position_).normalized();
+    }
+
+    /**
+     * Berechnet den Abstand vom Punkt zur Lichtquelle
+     * @param p Der Punkt auf der Oberfläche
+     * @return Abstand zur Lichtquelle
+     */
+    double distanceToPoint(const Point& p) const override {
+        return (position_ - p).magnitude();
+    }
+
+    /**
+     * Berechnet die Farbe des Lichts am Punkt p
+     * @param p Der Punkt auf der Oberfläche
+     * @return Die Farbe des Lichts am Punkt
+     */
+    Color colorAtPoint(const Point& p) const override {
+        // Erste Beleuchtungsstufe: keine Entfernungsschwächung, nur Farbe * Intensität.
+        // (Attenuation würde die Szene aktuell stark abdunkeln, weil die Test-Lichtquellen
+        // weit von den Objekten entfernt stehen.)
+        (void)p; // Punkt wird hier nicht benötigt
+        return color_ * intensity_;
+    }
 
     /**
      * Gleichheitsvergleich

@@ -263,8 +263,8 @@ void renderThreeSpheresWithMaterials() {
     scene->addObject(sphere3);
 
     // Kamera
-    Camera camera(800, 400, 60.0,
-                  Point(0, 0, -5), Point(0, 0, 0), Vector(0, 1, 0));
+    Camera camera(900, 400, 70.0,
+                  Point(0, 0, -6), Point(0, 0, 0), Vector(0, 1, 0));
 
     // Rendering
     RayTracer raytracer(scene, &camera);
@@ -298,14 +298,14 @@ void renderDiffuseVariation() {
     );
     scene->addLight(light);
 
-    // Erstelle 4 Kugeln mit unterschiedlichen diffuse-Werten
-    double diffuseValues[] = {0.3, 0.5, 0.7, 0.9};
-    for (int i = 0; i < 4; i++) {
+    // Erstelle 7 Kugeln mit unterschiedlichen diffuse-Werten (0.3 bis 0.9)
+    double diffuseValues[] = {0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+    for (int i = 0; i < 7; i++) {
         Sphere* sphere = new Sphere("sphere" + std::to_string(i));
-        sphere->setTransform(Matrix::translate(-3.0 + i * 2.0, 0, 0) *
-                            Matrix::scale(0.8, 0.8, 0.8));
+        sphere->setTransform(Matrix::translate(-4.8 + i * 1.6, 0, 0) *
+                            Matrix::scale(0.7, 0.7, 0.7));
         Material mat;
-        mat.color = Color(1.0, 0.8, 0.2);
+        mat.color = Color(1.0, 0.2, 1.0); // violett wie im Beispiel
         mat.ambient = 0.1;
         mat.diffuse = diffuseValues[i];
         mat.specular = 0.3;
@@ -314,9 +314,9 @@ void renderDiffuseVariation() {
         scene->addObject(sphere);
     }
 
-    // Kamera
-    Camera camera(800, 400, 70.0,
-                  Point(0, 0, -5), Point(0, 0, 0), Vector(0, 1, 0));
+    // Kamera (weiter weg und größerer Blickwinkel, damit die Reihe komplett sichtbar ist)
+    Camera camera(1400, 400, 90.0,
+                  Point(0, 0, -8.0), Point(0, 0, 0), Vector(0, 1, 0));
 
     // Rendering
     RayTracer raytracer(scene, &camera);
@@ -350,25 +350,25 @@ void renderSpecularVariation() {
     );
     scene->addLight(light);
 
-    // Erstelle 4 Kugeln mit unterschiedlichen specular-Werten
-    double specularValues[] = {0.3, 0.5, 0.7, 0.9};
-    for (int i = 0; i < 4; i++) {
+    // Erstelle 7 Kugeln mit unterschiedlichen specular-Werten (0.3 bis 0.9)
+    double specularValues[] = {0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+    for (int i = 0; i < 7; i++) {
         Sphere* sphere = new Sphere("sphere" + std::to_string(i));
-        sphere->setTransform(Matrix::translate(-3.0 + i * 2.0, 0, 0) *
-                            Matrix::scale(0.8, 0.8, 0.8));
+        sphere->setTransform(Matrix::translate(-4.8 + i * 1.6, 0, 0) *
+                            Matrix::scale(0.7, 0.7, 0.7));
         Material mat;
-        mat.color = Color(1.0, 0.8, 0.2);
+        mat.color = Color(1.0, 0.2, 1.0); // violett wie im Beispiel
         mat.ambient = 0.1;
-        mat.diffuse = 0.7;
+        mat.diffuse = 0.3;
         mat.specular = specularValues[i];
         mat.shininess = 100.0;
         sphere->setMaterial(mat);
         scene->addObject(sphere);
     }
 
-    // Kamera
-    Camera camera(800, 400, 70.0,
-                  Point(0, 0, -5), Point(0, 0, 0), Vector(0, 1, 0));
+    // Kamera (weiter weg und mit größerem Blickwinkel)
+    Camera camera(1400, 400, 90.0,
+                  Point(0, 0, -8.0), Point(0, 0, 0), Vector(0, 1, 0));
 
     // Rendering
     RayTracer raytracer(scene, &camera);
@@ -406,10 +406,10 @@ void renderShininessVariation() {
     double shininessValues[] = {10, 40, 70, 100, 130, 160, 190};
     for (int i = 0; i < 7; i++) {
         Sphere* sphere = new Sphere("sphere" + std::to_string(i));
-        sphere->setTransform(Matrix::translate(-6.0 + i * 2.0, 0, 0) *
-                            Matrix::scale(0.8, 0.8, 0.8));
+        sphere->setTransform(Matrix::translate(-4.8 + i * 1.6, 0, 0) *
+                            Matrix::scale(0.65, 0.65, 0.65));
         Material mat;
-        mat.color = Color(0.2, 0.8, 1.0);
+        mat.color = Color(1.0, 0.2, 1.0); // violett wie im Beispiel
         mat.ambient = 0.1;
         mat.diffuse = 0.7;
         mat.specular = 0.3;
@@ -418,9 +418,9 @@ void renderShininessVariation() {
         scene->addObject(sphere);
     }
 
-    // Kamera
-    Camera camera(1000, 300, 80.0,
-                  Point(0, 0, -5), Point(0, 0, 0), Vector(0, 1, 0));
+    // Kamera (weiter weg und breiterer Bildausschnitt, damit alle 7 Kugeln Platz haben)
+    Camera camera(1400, 360, 90.0,
+                  Point(0, 0, -8.0), Point(0, 0, 0), Vector(0, 1, 0));
 
     // Rendering
     RayTracer raytracer(scene, &camera);

@@ -26,6 +26,7 @@ public:
     double diffuse;   // Diffuser Reflexionskoeffizient (0.0 - 1.0)
     double specular;  // Spekularer Reflexionskoeffizient (0.0 - 1.0)
     double shininess; // Glanz (typisch: 10 - 200)
+    double reflectivity; // Reflexivität (0.0 = keine Reflexion, 1.0 = perfekter Spiegel)
 
     /**
      * Standard-Konstruktor
@@ -36,17 +37,19 @@ public:
           ambient(0.1),
           diffuse(0.9),
           specular(0.9),
-          shininess(200.0) {}
+          shininess(200.0),
+          reflectivity(0.0) {}
 
     /**
      * Konstruktor mit allen Parametern
      */
-    Material(const Color& color, double ambient, double diffuse, double specular, double shininess)
+    Material(const Color& color, double ambient, double diffuse, double specular, double shininess, double reflectivity = 0.0)
         : color(color),
           ambient(ambient),
           diffuse(diffuse),
           specular(specular),
-          shininess(shininess) {}
+          shininess(shininess),
+          reflectivity(reflectivity) {}
 
     /**
      * Gleichheitsvergleich
@@ -58,7 +61,8 @@ public:
                std::abs(ambient - other.ambient) < 1e-6 &&
                std::abs(diffuse - other.diffuse) < 1e-6 &&
                std::abs(specular - other.specular) < 1e-6 &&
-               std::abs(shininess - other.shininess) < 1e-6;
+               std::abs(shininess - other.shininess) < 1e-6 &&
+               std::abs(reflectivity - other.reflectivity) < 1e-6;
     }
 
     /**
@@ -82,10 +86,32 @@ public:
      * @param point Der Punkt auf der Oberfläche
      * @param eyeVector Der Vektor vom Punkt zum Betrachter (normalisiert)
      * @param normalVector Der Normalenvektor am Punkt (normalisiert)
+     * @param inShadow true wenn der Punkt im Schatten liegt
      * @return Die berechnete Farbe
      */
     Color phongLighting(const LightSource* light,
                        const Point& point,
                        const Vector& eyeVector,
-                       const Vector& normalVector) const;
+                       const Vector& normalVector,
+                       bool inShadow = false) const;
+
+    /**
+     * Berechnet die Beleuchtung nach dem Blinn-Phong-Modell
+     *
+     * Das Blinn-Phong-Modell ist eine Approximation des Phong-Modells,
+     * die etwas schneller ist. Anstatt den reflektierten Vektor zu berechnen,
+     * wird die Winkelhalbierende zwischen Lichtvektor und Eye-Vektor verwendet.
+     *
+     * @param light Die Lichtquelle
+     * @param point Der Punkt auf der Oberfläche
+     * @param eyeVector Der Vektor vom Punkt zum Betrachter (normalisiert)
+     * @param normalVector Der Normalenvektor am Punkt (normalisiert)
+     * @param inShadow true wenn der Punkt im Schatten liegt
+     * @return Die berechnete Farbe
+     */
+    Color blinnPhongLighting(const LightSource* light,
+                            const Point& point,
+                            const Vector& eyeVector,
+                            const Vector& normalVector,
+                            bool inShadow = false) const;
 };

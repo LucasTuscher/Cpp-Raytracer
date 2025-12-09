@@ -1,5 +1,7 @@
 #pragma once
 #include "../Color/Color.h"
+#include "../Point/Point.h"
+#include "../Vector/Vector.h"
 
 /**
  * LightSource-Klasse (Abstrakte Basisklasse)
@@ -55,4 +57,39 @@ public:
      * @param intensity Neue Intensität
      */
     void setIntensity(double intensity) { intensity_ = intensity; }
+
+    /**
+     * Prüft, ob die Lichtquelle gerichtet ist (directional)
+     * @return true für gerichtete Lichtquellen, false für Punktlichtquellen
+     */
+    virtual bool isDirectional() const = 0;
+
+    /**
+     * Berechnet den normalisierten Vektor vom Punkt zur Lichtquelle
+     * @param p Der Punkt auf der Oberfläche
+     * @return Normalisierter Vektor vom Punkt zur Lichtquelle
+     */
+    virtual Vector directionFromPoint(const Point& p) const = 0;
+
+    /**
+     * Berechnet den normalisierten Vektor von der Lichtquelle zum Punkt
+     * @param p Der Punkt auf der Oberfläche
+     * @return Normalisierter Vektor von der Lichtquelle zum Punkt
+     */
+    virtual Vector directionToPoint(const Point& p) const = 0;
+
+    /**
+     * Berechnet den Abstand vom Punkt zur Lichtquelle
+     * @param p Der Punkt auf der Oberfläche
+     * @return Abstand zur Lichtquelle (infinity für gerichtete Lichtquellen)
+     */
+    virtual double distanceToPoint(const Point& p) const = 0;
+
+    /**
+     * Berechnet die Farbe des Lichts am Punkt p
+     * Berücksichtigt Lichtfarbe, Intensität und ggf. Abschwächung
+     * @param p Der Punkt auf der Oberfläche
+     * @return Die Farbe des Lichts am Punkt
+     */
+    virtual Color colorAtPoint(const Point& p) const = 0;
 };

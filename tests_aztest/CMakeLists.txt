@@ -13,6 +13,8 @@ set(AZTEST_SOURCES
     SphereTests_AZTest.cpp
     SceneTests_AZTest.cpp
     CameraTests_AZTest.cpp
+    LightSourceTests_AZTest.cpp
+    ShadowTests_AZTest.cpp
 )
 
 # Create test executable

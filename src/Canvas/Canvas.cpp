@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 
 // Für PNG-Ausgabe verwenden wir eine einfache Lösung mit PPM-Format
 // PPM ist ein einfaches Textformat, das von den meisten Bildbetrachtungsprogrammen unterstützt wird
@@ -95,9 +96,21 @@ bool Canvas::save() const {
  * Danach: RGB-Werte (0-255) für jeden Pixel
  */
 bool Canvas::save(const std::string& filename) const {
-    std::string fullFilename = filename + ".ppm";
+    // Speichere standardmäßig in ./output relativ zum aktuellen Arbeitsverzeichnis.
+    // So landen die Dateien konsistent neben den Binaries (build/output).
+    std::string basePath = "output/";
+    // Falls filename bereits einen Pfad enthält, nutze ihn unverändert.
+    std::string fullFilename = filename.find('/') != std::string::npos
+        ? filename + ".ppm"
+        : basePath + filename + ".ppm";
+
+    // Stelle sicher, dass der Ausgabeordner existiert (nur wenn basePath genutzt wird).
+    if (filename.find('/') == std::string::npos) {
+        std::error_code ec;
+        std::filesystem::create_directories(basePath, ec);
+    }
+
     std::ofstream file(fullFilename);
-    
     if (!file.is_open()) {
         std::cerr << "Error: Could not open file " << fullFilename << std::endl;
         return false;
