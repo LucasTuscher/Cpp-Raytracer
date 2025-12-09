@@ -1,0 +1,4 @@
+[submodule "libs/AZTest-Cpp"]
+	path = libs/AZTest-Cpp
+	url = https://github.com/Airzade/AZTest-Cpp.git
+	branch = master
