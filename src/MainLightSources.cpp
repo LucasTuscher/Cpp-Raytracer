@@ -109,13 +109,13 @@ void renderDirectionalLight() {
 
     double intensities[] = {0.5, 1.0, 10.0};
     std::string filenames[] = {
-        "lightsources1-directional-0.5.ppm",
-        "lightsources2-directional-1.0.ppm",
-        "lightsources3-directional-10.0.ppm"
+        "lightsources1-directional-0.5",
+        "lightsources2-directional-1.0",
+        "lightsources3-directional-10.0"
     };
 
     for (int i = 0; i < 3; i++) {
-        std::cout << "  Rendering: " << filenames[i] << " (Intensität: " << intensities[i] << ")\n";
+        std::cout << "  Rendering: " << filenames[i] << ".ppm (Intensität: " << intensities[i] << ")\n";
 
         // Szene erstellen
         Scene* scene = createDefaultScene();
@@ -155,14 +155,14 @@ void renderPointLightWithAttenuation() {
 
     double intensities[] = {1.0, 10.0, 100.0, 200.0};
     std::string filenames[] = {
-        "lightsources4-point-attenuation-1.ppm",
-        "lightsources5-point-attenuation-10.ppm",
-        "lightsources6-point-attenuation-100.ppm",
-        "lightsources7-point-attenuation-200.ppm"
+        "lightsources4-point-attenuation-1",
+        "lightsources5-point-attenuation-10",
+        "lightsources6-point-attenuation-100",
+        "lightsources7-point-attenuation-200"
     };
 
     for (int i = 0; i < 4; i++) {
-        std::cout << "  Rendering: " << filenames[i] << " (Intensität: " << intensities[i] << ")\n";
+        std::cout << "  Rendering: " << filenames[i] << ".ppm (Intensität: " << intensities[i] << ")\n";
 
         // Szene erstellen
         Scene* scene = createDefaultScene();

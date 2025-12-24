@@ -4,6 +4,10 @@
 #include "../Vector/Vector.h"
 #include "../LightSource/LightSource.h"
 #include "../LightSource/PointLightSource.h"
+#include <memory>
+
+// Forward declaration
+class Texture;
 
 /**
  * Material-Klasse
@@ -22,6 +26,7 @@
 class Material {
 public:
     Color color;      // Farbe der Oberfläche
+    std::shared_ptr<const Texture> texture; // Optional: Textur (überschreibt/ergänzt Farbe)
     double ambient;   // Ambienter Reflexionskoeffizient (0.0 - 1.0)
     double diffuse;   // Diffuser Reflexionskoeffizient (0.0 - 1.0)
     double specular;  // Spekularer Reflexionskoeffizient (0.0 - 1.0)
@@ -34,6 +39,7 @@ public:
      */
     Material()
         : color(Color(1.0, 1.0, 1.0)),
+          texture(nullptr),
           ambient(0.1),
           diffuse(0.9),
           specular(0.9),
@@ -45,6 +51,7 @@ public:
      */
     Material(const Color& color, double ambient, double diffuse, double specular, double shininess, double reflectivity = 0.0)
         : color(color),
+          texture(nullptr),
           ambient(ambient),
           diffuse(diffuse),
           specular(specular),
@@ -58,6 +65,7 @@ public:
      */
     bool operator==(const Material& other) const {
         return color == other.color &&
+               texture == other.texture &&
                std::abs(ambient - other.ambient) < 1e-6 &&
                std::abs(diffuse - other.diffuse) < 1e-6 &&
                std::abs(specular - other.specular) < 1e-6 &&
@@ -93,7 +101,8 @@ public:
                        const Point& point,
                        const Vector& eyeVector,
                        const Vector& normalVector,
-                       bool inShadow = false) const;
+                       bool inShadow = false,
+                       const Color* surfaceColor = nullptr) const;
 
     /**
      * Berechnet die Beleuchtung nach dem Blinn-Phong-Modell
@@ -113,5 +122,6 @@ public:
                             const Point& point,
                             const Vector& eyeVector,
                             const Vector& normalVector,
-                            bool inShadow = false) const;
+                            bool inShadow = false,
+                            const Color* surfaceColor = nullptr) const;
 };

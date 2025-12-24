@@ -5,6 +5,7 @@
  */
 #include "Sphere.h"
 #include "../Intersection/Intersection.h"
+#include <algorithm>
 #include <cmath>
 
 /**
@@ -74,4 +75,26 @@ Vector Sphere::localNormalAt(const Point& localPoint) const {
 
     // Normalisieren (sollte eigentlich schon Länge 1 haben, aber sicherheitshalber)
     return normal.normalized();
+}
+
+UV Sphere::localUVAt(const Point& localPoint) const {
+    constexpr double kPi = 3.14159265358979323846;
+
+    // Theta: Winkel um die y-Achse (-pi..pi)
+    double theta = std::atan2(localPoint.z, localPoint.x);
+
+    // u: [0..1], seam bei x=-1,z=0
+    double u = (theta + kPi) / (2.0 * kPi);
+    if (u >= 1.0) {
+        u = 0.0;
+    }
+
+    // phi: 0 am Nordpol, pi am Südpol
+    double yClamped = std::clamp(localPoint.y, -1.0, 1.0);
+    double phi = std::acos(yClamped);
+
+    // v: 0..1 (oben..unten)
+    double v = phi / kPi;
+
+    return UV(u, v);
 }

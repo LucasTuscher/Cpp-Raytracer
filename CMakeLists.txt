@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(ENABLE_TESTS "Build unit tests" OFF)
 
+# Enable CTest integration so `ctest` can discover tests added via `add_test()`
+# (e.g. the AZTest-based test suite) even when GoogleTest is disabled.
+enable_testing()
+
 # Source files
 set(SOURCES
     src/Main.cpp
@@ -32,10 +36,15 @@ set(LIB_SOURCES
     src/Shape/Shape.cpp
     src/Shape/Sphere.cpp
     src/Shape/Plane.cpp
+    src/Shape/Cube.cpp
+    src/Shape/Cylinder.cpp
+    src/Shape/Cone.cpp
     src/Scene/Scene.cpp
     src/Camera/Camera.cpp
     src/RayTracer/RayTracer.cpp
     src/Material/Material.cpp
+    src/Texture/Image.cpp
+    src/Texture/ImageTexture.cpp
 )
 
 # Create a library for shared code
@@ -82,6 +91,24 @@ target_include_directories(raytracer_reflection PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
+# Textures demo executable (Image Texture + UV-Mapping)
+add_executable(raytracer_textures src/MainTexturedSphere.cpp)
+target_link_libraries(raytracer_textures raytracer_lib)
+target_include_directories(raytracer_textures PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Chapter 8: Additional primitives demo executable
+add_executable(raytracer_primitives src/MainPrimitives.cpp)
+target_link_libraries(raytracer_primitives raytracer_lib)
+target_include_directories(raytracer_primitives PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Render-Integrationstest (erzeugt PPM-Bilder für Kapitel 8)
+add_test(NAME RenderPrimitivesImages COMMAND $<TARGET_FILE:raytracer_primitives>)
+set_tests_properties(RenderPrimitivesImages PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # Test simple lighting executable
 add_executable(test_simple_lighting src/TestSimpleLighting.cpp)
 target_link_libraries(test_simple_lighting raytracer_lib)
@@ -119,9 +146,6 @@ if(ENABLE_TESTS)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    # Enable testing
-    enable_testing()
-
     # Test files
     set(TEST_SOURCES
         tests/TestMain.cpp
@@ -130,7 +154,12 @@ if(ENABLE_TESTS)
         tests/ColorTests.cpp
         tests/MatrixTests.cpp
         tests/IntersectionTests.cpp
+        tests/ShapeTests.cpp
         tests/SphereTests.cpp
+        tests/PlaneTests.cpp
+        tests/CubeTests.cpp
+        tests/CylinderTests.cpp
+        tests/ConeTests.cpp
         tests/SceneTests.cpp
         tests/CameraTests.cpp
     )

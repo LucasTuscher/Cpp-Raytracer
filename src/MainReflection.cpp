@@ -117,7 +117,7 @@ static Scene* createReflectionScene(double reflectiveFloor = 0.5, double reflect
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -8),
         Color(1, 1, 1),
-        1.2
+        240.0  // Höhere Intensität wegen Attenuation (inverse square law)
     );
     scene->addLight(light);
 
@@ -125,7 +125,7 @@ static Scene* createReflectionScene(double reflectiveFloor = 0.5, double reflect
     PointLightSource* fill = new PointLightSource(
         Point(8, 8, -6),
         Color(0.75, 0.8, 0.85),
-        0.3
+        60.0  // Höhere Intensität wegen Attenuation (inverse square law)
     );
     scene->addLight(fill);
 
@@ -133,7 +133,7 @@ static Scene* createReflectionScene(double reflectiveFloor = 0.5, double reflect
     PointLightSource* rim = new PointLightSource(
         Point(0, 12, 6),
         Color(1.0, 0.95, 0.9),
-        0.25
+        50.0  // Höhere Intensität wegen Attenuation (inverse square law)
     );
     scene->addLight(rim);
 

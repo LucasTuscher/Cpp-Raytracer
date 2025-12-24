@@ -10,11 +10,21 @@ set(AZTEST_SOURCES
     ColorTests_AZTest.cpp
     MatrixTests_AZTest.cpp
     IntersectionTests_AZTest.cpp
+    ShapeTests_AZTest.cpp
     SphereTests_AZTest.cpp
+    PlaneTests_AZTest.cpp
+    CubeTests_AZTest.cpp
+    CylinderTests_AZTest.cpp
+    ConeTests_AZTest.cpp
     SceneTests_AZTest.cpp
     CameraTests_AZTest.cpp
     LightSourceTests_AZTest.cpp
     ShadowTests_AZTest.cpp
+    ReflectionTests_AZTest.cpp
+    MaterialLightingTests_AZTest.cpp
+    AdvancedLightingTests_AZTest.cpp
+    SceneShadingTests_AZTest.cpp
+    TextureTests_AZTest.cpp
 )
 
 # Create test executable

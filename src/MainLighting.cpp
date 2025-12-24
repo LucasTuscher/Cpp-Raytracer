@@ -27,6 +27,10 @@
 #include "Material/Material.h"
 #include "LightSource/PointLightSource.h"
 
+// Point lights use inverse-square attenuation, so these demo scenes need a higher
+// intensity to remain visible at typical distances (~17 units).
+static constexpr double kDemoPointLightIntensity = 200.0;
+
 /**
  * Erstellt einen Ordner (falls nicht vorhanden)
  */
@@ -63,7 +67,7 @@ void renderSimpleLitSphere() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        kDemoPointLightIntensity
     );
     scene->addLight(light);
 
@@ -109,7 +113,7 @@ void renderPhongComponents() {
         sphere->setMaterial(mat);
         scene->addObject(sphere);
 
-        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), 1.0);
+        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), kDemoPointLightIntensity);
         scene->addLight(light);
 
         Camera camera(800, 800, 90.0, cameraPos, Point(0, 0, 0), Vector(0, 1, 0));
@@ -137,7 +141,7 @@ void renderPhongComponents() {
         sphere->setMaterial(mat);
         scene->addObject(sphere);
 
-        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), 1.0);
+        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), kDemoPointLightIntensity);
         scene->addLight(light);
 
         Camera camera(800, 800, 90.0, cameraPos, Point(0, 0, 0), Vector(0, 1, 0));
@@ -165,7 +169,7 @@ void renderPhongComponents() {
         sphere->setMaterial(mat);
         scene->addObject(sphere);
 
-        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), 1.0);
+        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), kDemoPointLightIntensity);
         scene->addLight(light);
 
         Camera camera(800, 800, 90.0, cameraPos, Point(0, 0, 0), Vector(0, 1, 0));
@@ -193,7 +197,7 @@ void renderPhongComponents() {
         sphere->setMaterial(mat);
         scene->addObject(sphere);
 
-        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), 1.0);
+        PointLightSource* light = new PointLightSource(lightPos, Color(1, 1, 1), kDemoPointLightIntensity);
         scene->addLight(light);
 
         Camera camera(800, 800, 90.0, cameraPos, Point(0, 0, 0), Vector(0, 1, 0));
@@ -222,7 +226,7 @@ void renderThreeSpheresWithMaterials() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        kDemoPointLightIntensity
     );
     scene->addLight(light);
 
@@ -294,7 +298,7 @@ void renderDiffuseVariation() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        kDemoPointLightIntensity
     );
     scene->addLight(light);
 
@@ -346,7 +350,7 @@ void renderSpecularVariation() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        kDemoPointLightIntensity
     );
     scene->addLight(light);
 
@@ -398,7 +402,7 @@ void renderShininessVariation() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        kDemoPointLightIntensity
     );
     scene->addLight(light);
 

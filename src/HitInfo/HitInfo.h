@@ -2,6 +2,7 @@
 #include "../Point/Point.h"
 #include "../Vector/Vector.h"
 #include "../Shape/Shape.h"
+#include "../UV/UV.h"
 
 /**
  * HitInfo-Struktur
@@ -16,6 +17,7 @@
  * - pointPlus: Punkt leicht über der Oberfläche (gegen Schatten-Akne)
  * - eyeVector: Vektor vom Punkt zur Kamera (normalisiert)
  * - normal: Normalenvektor am Schnittpunkt (normalisiert)
+ * - uv: Texturkoordinaten am Schnittpunkt
  */
 class HitInfo {
 public:
@@ -26,6 +28,7 @@ public:
     Vector eyeVector;      // Vektor vom Punkt zur Kamera (normalisiert)
     Vector normal;         // Normalenvektor am Schnittpunkt (normalisiert)
     Vector reflectVector;  // Reflektierter Vektor (für Reflexionsberechnung)
+    UV uv;                 // UV-Koordinaten am Schnittpunkt
 
     /**
      * Standard-Konstruktor
@@ -37,18 +40,20 @@ public:
           pointPlus(Point(0, 0, 0)),
           eyeVector(Vector(0, 0, 0)),
           normal(Vector(0, 0, 0)),
-          reflectVector(Vector(0, 0, 0)) {}
+          reflectVector(Vector(0, 0, 0)),
+          uv(UV(0.0, 0.0)) {}
 
     /**
      * Konstruktor mit allen Parametern
      */
     HitInfo(double t, const Shape* shape, const Point& point,
-            const Vector& eyeVector, const Vector& normal)
+            const Vector& eyeVector, const Vector& normal, const UV& uv)
         : t(t),
           shape(shape),
           point(point),
           pointPlus(point + normal * 1e-4),  // Epsilon-Verschiebung gegen Schatten-Akne
           eyeVector(eyeVector),
           normal(normal),
-          reflectVector(Vector::reflect(-eyeVector, normal)) {}
+          reflectVector(Vector::reflect(-eyeVector, normal)),
+          uv(uv) {}
 };

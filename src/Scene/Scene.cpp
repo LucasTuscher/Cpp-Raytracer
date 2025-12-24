@@ -7,6 +7,7 @@
 #include "../Shape/Sphere.h"
 #include "../Matrix/Matrix.h"
 #include "../Color/Color.h"
+#include "../Texture/Texture.h"
 #include <algorithm>
 
 /**
@@ -159,7 +160,10 @@ HitInfo Scene::computeHitInfo(const Intersection& intersection, const Ray& ray) 
     // Normale am Schnittpunkt berechnen
     Vector normal = shape->normalAt(point);
 
-    return HitInfo(t, shape, point, eyeVector, normal);
+    // UV-Koordinaten am Schnittpunkt berechnen (für Texturen)
+    UV uv = shape->uvAt(point);
+
+    return HitInfo(t, shape, point, eyeVector, normal, uv);
 }
 
 /**
@@ -172,6 +176,13 @@ Color Scene::shadeHit(const HitInfo& hitInfo, int depth) const {
     // Hole Material des getroffenen Objekts
     const Material& material = hitInfo.shape->getMaterial();
 
+    // Basis-/Texturfarbe am Schnittpunkt (einmal pro Hit berechnen)
+    Color surfaceColorAtPoint = material.color;
+    if (material.texture != nullptr) {
+        // Texturfarbe wird mit material.color getintet (material.color == Weiß -> unverändert)
+        surfaceColorAtPoint = material.texture->sample(hitInfo.uv, hitInfo.point) * material.color;
+    }
+
     // Für jede Lichtquelle in der Szene
     for (const auto& light : lights_) {
         // Schatten prüfen
@@ -183,7 +194,8 @@ Color Scene::shadeHit(const HitInfo& hitInfo, int depth) const {
             hitInfo.point,
             hitInfo.eyeVector,
             hitInfo.normal,
-            inShadow
+            inShadow,
+            &surfaceColorAtPoint
         );
 
         // Addiere zur Gesamtfarbe
@@ -192,7 +204,9 @@ Color Scene::shadeHit(const HitInfo& hitInfo, int depth) const {
 
     // Berechne reflektierte Farbe und füge sie hinzu
     Color reflectedContribution = reflectedColor(hitInfo, depth);
-    surfaceColor = surfaceColor + reflectedContribution;
+    double reflectivity = material.reflectivity;
+    reflectivity = std::clamp(reflectivity, 0.0, 1.0);
+    surfaceColor = surfaceColor * (1.0 - reflectivity) + reflectedContribution;
 
     return surfaceColor;
 }
@@ -257,7 +271,7 @@ bool Scene::isInShadow(const Point& point, const LightSource* light) const {
     }
 
     // Richtung und Distanz zur Lichtquelle
-    Vector directionToLight = light->directionToPoint(point);
+    Vector directionToLight = light->directionFromPoint(point);
     double distanceToLight = light->distanceToPoint(point);
 
     // Kleines Epsilon, um Self-Intersections zu vermeiden
@@ -302,7 +316,7 @@ Scene* Scene::defaultScene() {
     PointLightSource* light = new PointLightSource(
         Point(-10, 10, -10),
         Color(1, 1, 1),
-        1.0
+        200.0  // Höhere Intensität wegen Attenuation (inverse square law)
     );
     scene->addLight(light);
 

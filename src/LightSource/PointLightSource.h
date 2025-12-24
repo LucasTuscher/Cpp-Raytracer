@@ -93,11 +93,15 @@ public:
      * @return Die Farbe des Lichts am Punkt
      */
     Color colorAtPoint(const Point& p) const override {
-        // Erste Beleuchtungsstufe: keine Entfernungsschwächung, nur Farbe * Intensität.
-        // (Attenuation würde die Szene aktuell stark abdunkeln, weil die Test-Lichtquellen
-        // weit von den Objekten entfernt stehen.)
-        (void)p; // Punkt wird hier nicht benötigt
-        return color_ * intensity_;
+        // Inverse-square attenuation: intensity falls off with distance².
+        // At the light position, avoid division by zero and return full intensity.
+        double distance = distanceToPoint(p);
+        if (distance <= 1e-12) {
+            return color_ * intensity_;
+        }
+
+        double attenuation = 1.0 / (distance * distance);
+        return color_ * intensity_ * attenuation;
     }
 
     /**

@@ -63,3 +63,18 @@ Vector Shape::normalAt(const Point& worldPoint) const {
     worldNormal.w = 0.0;
     return worldNormal.normalized();
 }
+
+UV Shape::uvAt(const Point& worldPoint) const {
+    // Lazy Evaluation für inverse Matrix
+    if (!inverseCached_) {
+        if (cachedInverse_ != nullptr) {
+            delete cachedInverse_;
+        }
+        cachedInverse_ = new Matrix(transformation_.inverse());
+        inverseCached_ = true;
+    }
+
+    // Punkt ins lokale Koordinatensystem transformieren
+    Point localPoint = (*cachedInverse_) * worldPoint;
+    return localUVAt(localPoint);
+}

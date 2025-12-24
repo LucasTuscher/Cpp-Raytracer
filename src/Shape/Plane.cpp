@@ -18,3 +18,9 @@ Intersections Plane::localIntersect(const Ray& ray) const {
 Vector Plane::localNormalAt(const Point& /*localPoint*/) const {
     return Vector(0, 1, 0);
 }
+
+UV Plane::localUVAt(const Point& localPoint) const {
+    double u = localPoint.x - std::floor(localPoint.x);
+    double v = localPoint.z - std::floor(localPoint.z);
+    return UV(u, v);
+}

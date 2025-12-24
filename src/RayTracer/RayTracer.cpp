@@ -4,6 +4,8 @@
  * Implementierung der RayTracer-Klasse.
  */
 #include "RayTracer.h"
+#include <chrono>
+#include <iostream>
 
 /**
  * Konstruktor mit Standard-Farben
@@ -32,6 +34,8 @@ RayTracer::RayTracer(const Scene* scene, const Camera* camera,
  * Rendert die Szene
  */
 void RayTracer::render() {
+    const auto start = std::chrono::steady_clock::now();
+
     // Für jedes Pixel des Bildes
     for (int y = 0; y < camera_->getHeight(); y++) {
         for (int x = 0; x < camera_->getWidth(); x++) {
@@ -59,4 +63,9 @@ void RayTracer::render() {
             renderTarget_.setPixel(x, y, pixelColor);
         }
     }
+
+    const auto end = std::chrono::steady_clock::now();
+    const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    std::cout << "Renderzeit: " << ns << " ns (" << ms << " ms)" << std::endl;
 }

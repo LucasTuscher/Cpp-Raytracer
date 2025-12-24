@@ -4,6 +4,7 @@
 #include "../Point/Point.h"
 #include "../Matrix/Matrix.h"
 #include "../Material/Material.h"
+#include "../UV/UV.h"
 #include <string>
 
 // Forward declaration
@@ -163,6 +164,16 @@ public:
     Vector normalAt(const Point& worldPoint) const;
 
     /**
+     * Berechnet UV-Koordinaten an einem Punkt auf der Oberfläche (Weltkoordinaten)
+     *
+     * Transformiert den Punkt ins lokale Koordinatensystem und ruft dann localUVAt() auf.
+     *
+     * @param worldPoint Punkt auf der Oberfläche in Weltkoordinaten
+     * @return UV-Koordinaten (typisch im Bereich [0,1])
+     */
+    UV uvAt(const Point& worldPoint) const;
+
+    /**
      * Berechnet den Normalenvektor im lokalen Koordinatensystem
      *
      * Diese Methode muss von allen abgeleiteten Klassen implementiert werden.
@@ -171,6 +182,16 @@ public:
      * @return Normalisierter Normalenvektor im lokalen Koordinatensystem
      */
     virtual Vector localNormalAt(const Point& localPoint) const = 0;
+
+    /**
+     * Berechnet UV-Koordinaten im lokalen Koordinatensystem
+     *
+     * Diese Methode muss von allen abgeleiteten Klassen implementiert werden.
+     *
+     * @param localPoint Punkt auf der Oberfläche im lokalen Koordinatensystem
+     * @return UV-Koordinaten
+     */
+    virtual UV localUVAt(const Point& localPoint) const = 0;
 
     /**
      * Gleichheitsvergleich (für Tests)

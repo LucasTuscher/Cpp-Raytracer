@@ -149,6 +149,7 @@ public:
      * - Schnittpunkt (berechnet aus Ray und t)
      * - Eye-Vektor (negierte Ray-Richtung)
      * - Normale (berechnet am Schnittpunkt)
+     * - UV-Koordinaten (für Textur-Sampling)
      *
      * @param intersection Die Intersection, die den Schnittpunkt beschreibt
      * @param ray Der Strahl, der das Objekt trifft

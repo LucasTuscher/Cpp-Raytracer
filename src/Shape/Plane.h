@@ -25,4 +25,11 @@ public:
      * Normale ist konstant (0, 1, 0) überall auf der Ebene.
      */
     Vector localNormalAt(const Point& localPoint) const override;
+
+    /**
+     * UV-Mapping für eine unendliche Ebene (xz-Ebene).
+     *
+     * Wiederholt sich alle 1.0 Einheiten in x und z.
+     */
+    UV localUVAt(const Point& localPoint) const override;
 };

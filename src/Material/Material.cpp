@@ -27,12 +27,16 @@ Color Material::phongLighting(const LightSource* light,
                               const Point& point,
                               const Vector& eyeVector,
                               const Vector& normalVector,
-                              bool inShadow) const {
+                              bool inShadow,
+                              const Color* surfaceColor) const {
     // Lichtfarbe am Punkt (berücksichtigt Intensität und ggf. Attenuation)
     Color lightColorAtPoint = light->colorAtPoint(point);
 
+    // Basisfarbe (Materialfarbe oder von außen vorgegeben, z.B. Textur-Sample)
+    const Color& baseColor = surfaceColor != nullptr ? *surfaceColor : color;
+
     // Effektive Farbe: Objektfarbe * Lichtfarbe am Punkt
-    Color effectiveColor = color * lightColorAtPoint;
+    Color effectiveColor = baseColor * lightColorAtPoint;
 
     // 1. Ambiente Komponente (immer vorhanden, auch im Schatten)
     Color ambientContribution = effectiveColor * ambient;
@@ -90,12 +94,16 @@ Color Material::blinnPhongLighting(const LightSource* light,
                                    const Point& point,
                                    const Vector& eyeVector,
                                    const Vector& normalVector,
-                                   bool inShadow) const {
+                                   bool inShadow,
+                                   const Color* surfaceColor) const {
     // Lichtfarbe am Punkt (berücksichtigt Intensität und ggf. Attenuation)
     Color lightColorAtPoint = light->colorAtPoint(point);
 
+    // Basisfarbe (Materialfarbe oder von außen vorgegeben, z.B. Textur-Sample)
+    const Color& baseColor = surfaceColor != nullptr ? *surfaceColor : color;
+
     // Effektive Farbe: Objektfarbe * Lichtfarbe am Punkt
-    Color effectiveColor = color * lightColorAtPoint;
+    Color effectiveColor = baseColor * lightColorAtPoint;
 
     // 1. Ambiente Komponente (immer vorhanden, auch im Schatten)
     Color ambientContribution = effectiveColor * ambient;

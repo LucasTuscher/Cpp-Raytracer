@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
 
 // Für PNG-Ausgabe verwenden wir eine einfache Lösung mit PPM-Format
@@ -125,10 +127,15 @@ bool Canvas::save(const std::string& filename) const {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             Color c = pixels[getIndex(x, y)].clamped();
-            
-            int r = static_cast<int>(c.r * 255.0);
-            int g = static_cast<int>(c.g * 255.0);
-            int b = static_cast<int>(c.b * 255.0);
+
+            auto toByte = [](double channel) {
+                int value = static_cast<int>(std::lround(channel * 255.0));
+                return std::clamp(value, 0, 255);
+            };
+
+            int r = toByte(c.r);
+            int g = toByte(c.g);
+            int b = toByte(c.b);
             
             file << r << " " << g << " " << b << "  ";
         }

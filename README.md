@@ -81,11 +81,7 @@ cmake --build build --config Debug
 
 ```powershell
 # Tests ausführen
-.\build\Release\raytracer_tests.exe
-
-# Oder mit ctest
-cd build
-ctest -C Release --output-on-failure
+cmake -E chdir build ctest -C Release --output-on-failure
 
 # Hauptprogramm ausführen
 .\build\Release\raytracer.exe
@@ -110,11 +106,7 @@ cmake --build build --config Debug
 
 ```bash
 # Tests ausführen
-./build/raytracer_tests
-
-# Oder mit ctest
-cd build
-ctest --output-on-failure
+cmake -E chdir build ctest --output-on-failure
 
 # Hauptprogramm ausführen
 ./build/raytracer

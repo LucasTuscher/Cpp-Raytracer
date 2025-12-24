@@ -56,4 +56,11 @@ public:
      * @return Normalisierter Normalenvektor
      */
     Vector localNormalAt(const Point& localPoint) const override;
+
+    /**
+     * Sphärisches UV-Mapping für eine Einheitskugel im Ursprung.
+     *
+     * u läuft um die Kugel (0..1), v von oben nach unten (0..1).
+     */
+    UV localUVAt(const Point& localPoint) const override;
 };
