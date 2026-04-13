@@ -164,42 +164,6 @@ Color bright = (custom * 2.5).clamped();  // Skalierung + Clamping
 Color sum = red + custom;
 ```
 
-## Projekt-Struktur
-
-```
-Cpp-Raytracer/
-├── src/                          # Quellcode
-│   ├── Point/
-│   │   ├── Point.h              # Point-Klasse
-│   │   └── Point.cpp
-│   ├── Vector/
-│   │   ├── Vector.h             # Vector-Klasse
-│   │   └── Vector.cpp
-│   ├── Color/
-│   │   ├── Color.h              # Color-Klasse
-│   │   └── Color.cpp
-│   └── Main.cpp                 # Demo-Programm
-│
-├── tests/                        # Test-Suite
-│   ├── PointTests.cpp           # 13 Point-Tests
-│   ├── VectorTests.cpp          # 18 Vector-Tests
-│   ├── ColorTests.cpp           # 8 Color-Tests
-│   └── README.md                # Test-Dokumentation
-│
-├── build/                        # Build-Artefakte (generiert)
-│   └── Release/
-│       ├── raytracer.exe        # Hauptprogramm
-│       └── raytracer_tests.exe  # Tests
-│
-├── CMakeLists.txt               # CMake-Konfiguration
-├── build_and_test.ps1           # Build-Script
-├── README.md                    # Diese Datei
-├── IMPLEMENTATION.md            # Implementierungs-Details
-├── TESTING_SUMMARY.md           # Test-Ergebnisse
-├── PROJECT_STRUCTURE.md         # Detaillierte Struktur
-└── LICENSE                      # MIT Lizenz
-```
-
 ## Nach Änderungen neu kompilieren
 
 **Windows:**
